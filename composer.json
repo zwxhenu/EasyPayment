@@ -1,0 +1,24 @@
+{
+    "name": "easypayment/easy-payment",
+    "description": "集成三方支付类库（微信，百支付宝，百度钱包）",
+    "type": "project",
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "zwxhenu",
+            "email": "zangliterature@163.com"
+        }
+    ],
+    "minimum-stability": "dev",
+    "require": {},
+	"autoload": {
+        "psr-4": {
+            "EasyPayment\\payment\\": "src/"
+        }
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "EasyPayment\\payment\\Tests\\": "tests/"
+        }
+    },
+}
