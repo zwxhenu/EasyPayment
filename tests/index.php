@@ -1,8 +1,8 @@
 <?php
 namespace EasyPayment\payment\Tests;
-use EasyPayment\payment\alipay\pay;
+use EasyPayment\payment\alipayService;
 require __DIR__.'/vendor/autoload.php';
-$pay = new pay();
+$pay = new alipayService();
 $pay->setOrderSn('13354666');
 $pay->setPayMoney('0.01');
 $pay->setSubject('֧测试支付');

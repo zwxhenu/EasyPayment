@@ -16,7 +16,7 @@ interface AlipayConfigContract
     public function setPaymentType($payment_type);
 
     /**
-     * 访问模式 http https
+     * 访问模式 http|https
      * @param $transport
      */
     public function setTransport($transport);
@@ -28,13 +28,13 @@ interface AlipayConfigContract
 
     /**
      * 设置字符编码
-     * @param $input_charset
+     * @param $input_charset utf-8
      */
     public function setInputCharset($input_charset);
 
     /**
      * 设置签名方式
-     * @param $sign_type
+     * @param $sign_type md5
      */
     public function setSignType($sign_type);
 
