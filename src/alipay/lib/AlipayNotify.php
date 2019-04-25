@@ -1,4 +1,7 @@
 <?php
+/**
+ * 支付宝异步同步回调验证
+ */
 namespace EasyPayment\payment\alipay\lib;
 
 use EasyPayment\payment\alipay\lib\AlipayCoreFunction;
@@ -140,6 +143,7 @@ class AlipayNotify
         }
         $veryfy_url = $veryfy_url . "partner=" . $partner . "&notify_id=" . $notify_id;
         $responseTxt = $this->core_obj->getHttpResponseGET($veryfy_url, $this->alipay_config['cacert']);
+
         return $responseTxt;
     }
 }

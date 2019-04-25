@@ -213,6 +213,7 @@ class alipayService implements PayContract,AlipayConfigContract
 
     /**
      * 产品类型
+     *
      * pc : create_direct_pay_by_user
      * wap : alipay.wap.create.direct.pay.by.user
      * @param $service
@@ -287,6 +288,7 @@ class alipayService implements PayContract,AlipayConfigContract
 
     /**
      * 是否为WAP支付
+     *
      * @param $is_wap
      * @return $this
      */
@@ -299,6 +301,7 @@ class alipayService implements PayContract,AlipayConfigContract
 
     /**
      * 支付金额
+     *
      * @param int $pay_money
      * @return $this
      */
@@ -313,6 +316,7 @@ class alipayService implements PayContract,AlipayConfigContract
 
     /**
      * 支付摘要
+     *
      * @param string $subject
      * @return $this
      */
@@ -328,6 +332,7 @@ class alipayService implements PayContract,AlipayConfigContract
 
     /**
      * 商品详情
+     *
      * @param string $body
      * @return $this
      */
@@ -396,6 +401,7 @@ class alipayService implements PayContract,AlipayConfigContract
 
     /**
      * 发起支付
+     *
      * @return array
      */
     public function directPay()
@@ -455,71 +461,9 @@ class alipayService implements PayContract,AlipayConfigContract
         // 建立请求
         $alipaySubmit = new AlipaySubmit($alipay_config);
         $html_text = $alipaySubmit->buildRequestForm($params, "get", "确认");
+
+        return $this->pay_common_obj->alertInfo(0, '成功！', array('content' =>$html_text));
     }
-
-
-//    /**
-//     * 获取配置设置
-//     * @param int $receipt_supplier_id 收款商户ID
-//     * @return array|bool|mixed
-//     */
-//    public function getPayConfig($receipt_supplier_id)
-//    {
-//        //检测是否允许自有支付
-//        $check_res = self::checkAllowPay($receipt_supplier_id, self::$ali_self_pay_type_id);
-//        if ($check_res !== false) {
-//            $pay_config = $check_res;
-//            if (!is_array($pay_config) || empty($pay_config) || empty($pay_config['partner']) || empty($pay_config['key'])) {
-//                return '商户支付信息配置错误';
-//            }
-//            $this->pay_type_id = self::$ali_self_pay_type_id;
-//            return $pay_config;
-//        }
-//        //检测是否允许非自有支付
-//        $check_res = self::checkAllowPay($receipt_supplier_id, self::$ali_pay_type_id);
-//        if ($check_res === false) {
-//            return '该商户不支持支付宝支付';
-//        }
-//        //非自有支付 - 获取默认账户配置
-//        $default_config = [];
-//        require(PAY_ROOT . 'alipay/lib/aliconfig.default.account.php');
-//        $this->receipt_supplier_id = 0;
-//        $this->pay_type_id = self::$ali_pay_type_id;
-//        return $default_config;
-//    }
-//
-//    /**
-//     * 获取查询配置
-//     * @param $receipt_supplier_id
-//     * @param string $partner
-//     * @return array|bool|mixed
-//     */
-//    public function getQueryConfig($receipt_supplier_id, $partner = '')
-//    {
-//        if ($receipt_supplier_id <= 0) {
-//            // 获取默认账户配置
-//            $default_config = [];
-//            require(PAY_ROOT . 'alipay/lib/aliconfig.default.account.php');
-//            if (!empty($partner) && $default_config['partner'] != $partner) {
-//                return '该商户支付账号不匹配';
-//            }
-//            return $default_config;
-//        }
-//        //获取自有支付配置
-//        $SupplierPayTypeModel = new SupplierPayType($receipt_supplier_id);
-//        $payset_info = $SupplierPayTypeModel->getOneBySupplierIdPayTypeId($receipt_supplier_id, self::$ali_self_pay_type_id);
-//        if (empty($payset_info)) {
-//            return '获取不到支付时的配置参数';
-//        }
-//        $pay_config = json_decode($payset_info->pay_config, true);
-//        if (!is_array($pay_config) || empty($pay_config) || empty($pay_config['partner']) || empty($pay_config['key'])) {
-//            return '该商户支付参数配置错误';
-//        }
-//        if (!empty($partner) && $pay_config['partner'] != $partner) {
-//            return '该商户支付账号不匹配';
-//        }
-//        return $pay_config;
-//    }
 
     /**
      * 查询订单支付状态
@@ -530,18 +474,16 @@ class alipayService implements PayContract,AlipayConfigContract
     public function queryOrder($trade_no = '', $out_trade_no = '')
     {
         //查询支付信息
-        $alipay_config['partner'] = $this->partner;
-        $alipay_config['key'] = $this->key;
-        $alipay_config['seller_id'] = $this->seller_id;
+        $pay_config = $this->getPayQueryOrderConfig();
         $parameter = [
             "service" => "single_trade_query",
-            "partner" => $this->partner,
+            "partner" => $pay_config['partner'],
             "trade_no" => $trade_no,  // 支付宝交易流水号
             "out_trade_no" => $out_trade_no,  // 商户网站订单系统中唯一订单号，必填
-            "_input_charset" => trim(strtolower($alipay_config['input_charset']))
+            "_input_charset" => trim(strtolower($pay_config['input_charset']))
         ];
         // 建立请求
-        $alipaySubmit = new AlipaySubmit($alipay_config);
+        $alipaySubmit = new AlipaySubmit($pay_config);
         $html_text = $alipaySubmit->buildRequestHttp($parameter);
         $trade_info = json_decode(json_encode(simplexml_load_string($html_text)), true);
         $data['trade_info'] = $trade_info;
@@ -551,7 +493,8 @@ class alipayService implements PayContract,AlipayConfigContract
         $dk_total_money = round($trade_info['total_fee'], 2);
         $data['dk_total_money'] = $dk_total_money;
         $data['trade_no'] = $trade_info['trade_no'];
-        return $this->pay_common_obj->alertInfo(0, '', $data);
+
+        return $this->pay_common_obj->alertInfo(0, '成功！', $data);
     }
     /**
      * 支付同步回调
@@ -559,19 +502,19 @@ class alipayService implements PayContract,AlipayConfigContract
     public function payReturn()
     {
         $res = $this->notify(false);
+        $jump_url = '';
         if (isset($res['data']['error_url'])) {
             if (isset($res['code']) && $res['code'] === 0) {
                 //拼接参数
                 $trade_no = $res['data']['trade_no'];
                 $success_url = $res['data']['success_url'];
-                $url = strstr($success_url, '?') ? $success_url . '&trade_no=' . $trade_no : $success_url . '?trade_no=' . $trade_no;
-                header('Location: ' . $url);
+                $jump_url = strstr($success_url, '?') ? $success_url . '&trade_no=' . $trade_no : $success_url . '?trade_no=' . $trade_no;
             } else {
-                header('Location: ' . $res['data']['error_url']);
+                $jump_url = $res['data']['error_url'];
             }
-        } else {
-            die($res['msg']);
         }
+
+        return $this->pay_common_obj->alertInfo(0, 'success', array('url' => $jump_url));
     }
 
     /**
@@ -581,14 +524,15 @@ class alipayService implements PayContract,AlipayConfigContract
     {
         $res = $this->notify(true);
         if (!isset($res['code']) || $res['code'] !== 0) {
-            die('fail');
-        } else {
-            die('success');
+            return $this->pay_common_obj->alertInfo(1, '回调失败！');
         }
+
+        return $this->pay_common_obj->alertInfo(0, '回调成功！');
     }
 
     /**
      * 支付回调处理
+     *
      * @param bool $is_notify 是否为异步回调
      * @return array
      */
@@ -610,12 +554,10 @@ class alipayService implements PayContract,AlipayConfigContract
         if (empty($out_trade_no) || empty($trade_no) || $pay_money <= 0 || empty($order_sn)) {
             return $this->pay_common_obj->alertInfo(1, '回传数据异常', $data);
         }
-        $data['error_url'] = $this->error_url;
-        $data['success_url'] = $this->success_url;
+        $alipay_config = $this->getPayCallbackConfig();
+        $data['error_url'] = $alipay_config['error_url'];
+        $data['success_url'] = $alipay_config['success_url'];
         // 验证签名
-        $alipay_config['partner'] = $this->partner;
-        $alipay_config['key'] = $this->key;
-        $alipay_config['seller_id'] = $this->seller_id;
         $alipayNotify = new AlipayNotify($alipay_config);
         if ($is_notify == true) {
             $verify_result = $alipayNotify->verifyNotify();
@@ -629,6 +571,44 @@ class alipayService implements PayContract,AlipayConfigContract
         if ($pay_result != 'TRADE_SUCCESS') {
             return $this->pay_common_obj->alertInfo(1, '支付失败！', $data);
         }
+
         return $this->pay_common_obj->alertInfo(0, '支付成功！', $data);
+    }
+
+    /**
+     * 支付回调详细配置信息
+     *
+     * @return array
+     */
+    private function getPayCallbackConfig()
+    {
+
+        $pay_config = array('error_url' => $this->error_url,
+            'success_url' => $this->success_url,
+            'partner' => $this->partner,
+            'key' => $this->key,
+            'seller_id' => $this->seller_id,
+            'transport' => $this->transport,
+            'sign_type' => $this->sign_type);
+
+        return $pay_config;
+    }
+
+    /**
+     * 支付查询详细配置信息
+     *
+     * @return array
+     */
+    private function getPayQueryOrderConfig()
+    {
+
+        $pay_config = array('partner' => $this->partner,
+            'key' => $this->key,
+            'seller_id' => $this->seller_id,
+            'transport' => $this->transport,
+            'sign_type' => $this->sign_type,
+            'cacert' => $this->cacert);
+
+        return $pay_config;
     }
 }

@@ -1,6 +1,6 @@
 <?php
 /**
- * 处理方法操作类
+ * 公共处理方法
  */
 namespace EasyPayment\payment\alipay\lib;
 
@@ -30,7 +30,8 @@ class AlipayCoreFunction
     }
 
     /**
-     * 把数组所有元素，按照“参数=参数值”的模式用“&”字符拼接成字符串，并对字符串做urlencode编码
+     * 把数组所有元素，按照“参数=参数值”的模式用“&”字符拼接成字符串，
+     * 并对字符串做urlencode编码
      *
      * @param array $para 需要拼接的数组 return 拼接完成以后的字符串
      * @return string
@@ -173,8 +174,10 @@ class AlipayCoreFunction
             $output = mb_convert_encoding($input, $_output_charset, $_input_charset);
         } elseif (function_exists("iconv")) {
             $output = iconv($_input_charset, $_output_charset, $input);
-        } else
+        } else{
             die("sorry, you have no libs support for charset change.");
+        }
+
         return $output;
     }
 
@@ -194,8 +197,10 @@ class AlipayCoreFunction
             $output = mb_convert_encoding($input, $_output_charset, $_input_charset);
         } elseif (function_exists("iconv")) {
             $output = iconv($_input_charset, $_output_charset, $input);
-        } else
+        } else{
             die("sorry, you have no libs support for charset changes.");
+        }
+
         return $output;
     }
     /**
@@ -208,6 +213,7 @@ class AlipayCoreFunction
     public function md5Sign($prestr, $key)
     {
         $prestr = $prestr . $key;
+
         return md5($prestr);
     }
 

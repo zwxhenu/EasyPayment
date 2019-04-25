@@ -1,17 +1,21 @@
 <?php
-namespace Shark\Library\Service\pay\bdpay\lib;
-final class sp_conf
+/**
+ * 初始化配置
+ */
+namespace EasyPayment\payment\bdpay\lib;
+
+final class BdpayConfig
 {
     // 商户在百度钱包的商户ID
     public static $SP_NO = '';
     // 密钥文件路径，该文件中保存了商户的百度钱包合作密钥，该文件需要放在一个安全的地方，切勿让外人知晓或者外网访问
     public static $SP_KEY = '';
     //支付成功同步回调地址
-    public static $RETURN_URL = PAY_RETURN_URL . '/bdpay_return';
+    public static $RETURN_URL = '';
     //支付成功异步回调地址
-    public static $NOTIFY_URL = PAY_RETURN_URL . '/bdpay_notify';
+    public static $NOTIFY_URL = '';
     // 日志文件
-    public static $LOG_FILE = LOG_ROOT . '/bd_sdk.log';
+    public static $LOG_FILE = '/tmp/bd_sdk.log';
 
     // 商户订单支付成功
     const SP_PAY_RESULT_SUCCESS = 1;

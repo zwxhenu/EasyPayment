@@ -1,6 +1,6 @@
 <?php
 /**
- * 支付操作类
+ * 发起支付操作
  */
 namespace EasyPayment\payment\alipay\lib;
 

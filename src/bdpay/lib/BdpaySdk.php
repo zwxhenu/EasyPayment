@@ -1,15 +1,16 @@
 <?php
-namespace Shark\Library\Service\pay\bdpay\lib;
-require_once('bdpay_pay.cfg.php');
 
-class bdpay_sdk
+namespace EasyPayment\payment\bdpay\lib;
+
+use EasyPayment\payment\bdpay\lib\BdpayConfig;
+
+class BdpaySdk
 {
-    public $err_msg;
-    public $order_no;
+    public $err_msg = '';
+    public $order_no = '';
 
     function __construct()
-    {
-    }
+    {}
 
     /**
      * 生成百度钱包PC端网银支付前置接口对应的URL
@@ -18,7 +19,7 @@ class bdpay_sdk
      * @param string $url 百度钱包PC端网银支付前置接口URL
      * @return string 返回生成的百度钱包PC端网银支付前置接口URL
      */
-    function create_baifubao_pay_order_url($params, $url)
+    function createBaifubaoPayOrderUrl($params, $url)
     {
         if (empty($params ['service_code']) || empty($params ['sp_no']) ||
             empty($params ['order_create_time']) ||
@@ -37,11 +38,11 @@ class bdpay_sdk
         }
         if (!in_array($url,
             array(
-                sp_conf::BFB_PAY_DIRECT_LOGIN_URL,
-                sp_conf::BFB_PAY_DIRECT_NOLOGIN_URL,  // (xyz增加)
-                sp_conf::BFB_PAY_WAP_DIRECT_NEEDLOGIN_URL,  // (xyz增加)
-                sp_conf::BFB_PAY_WAP_DIRECT_NOLOGIN_URL,  // (xyz增加)
-                sp_conf::BFB_QUERY_ORDER_URL
+                BdpayConfig::BFB_PAY_DIRECT_LOGIN_URL,
+                BdpayConfig::BFB_PAY_DIRECT_NOLOGIN_URL,  // (xyz增加)
+                BdpayConfig::BFB_PAY_WAP_DIRECT_NEEDLOGIN_URL,  // (xyz增加)
+                BdpayConfig::BFB_PAY_WAP_DIRECT_NOLOGIN_URL,  // (xyz增加)
+                BdpayConfig::BFB_QUERY_ORDER_URL
             ))
         ) {
             $this->log(
@@ -50,7 +51,7 @@ class bdpay_sdk
             return false;
         }
         $pay_url = $url;
-        if (false === ($sign = $this->make_sign($params))) {
+        if (false === ($sign = $this->makeSign($params))) {
             return false;
         }
         $this->order_no = $params ['order_no'];
@@ -69,7 +70,7 @@ class bdpay_sdk
      *
      * @return boolean 预处理成功返回true，否则返回false
      */
-    function check_bfb_pay_result_notify()
+    function checkBaifubaoPayResultNotify()
     {
         // 检查请求的必选参数，具体的参数参见接口文档
         if (empty($_GET) || !isset($_GET ['sp_no']) || !isset(
@@ -89,14 +90,14 @@ class bdpay_sdk
         $arr_params = $_GET;
         $this->order_no = $arr_params ['order_no'];
         // 检查商户ID是否是自己，如果传过来的sp_no不是商户自己的，那么说明这个百度钱包的支付结果通知无效
-        if (sp_conf::$SP_NO != $arr_params ['sp_no']) {
+        if (BdpayConfig::$SP_NO != $arr_params ['sp_no']) {
             $this->err_msg = '百度钱包的支付结果通知中商户ID无效，该通知无效';
             $this->log(
                 'the id in baifubao notify is wrong, this notify is invaild');
             return false;
         }
         // 检查支付通知中的支付结果是否为支付成功
-        if (sp_conf::BFB_PAY_RESULT_SUCCESS != $arr_params ['pay_result']) {
+        if (BdpayConfig::BFB_PAY_RESULT_SUCCESS != $arr_params ['pay_result']) {
             $this->err_msg = '百度钱包的支付结果通知中商户支付结果异常，该通知无效';
             $this->log(
                 'the pay result in baifubao notify is wrong, this notify is invaild');
@@ -104,7 +105,7 @@ class bdpay_sdk
         }
 
         // 签名校验
-        if (false === $this->check_sign($arr_params)) {
+        if (false === $this->checkSign($arr_params)) {
             $this->err_msg = '百度钱包后台通知签名校验失败';
             $this->log('baifubao notify sign failed');
             return false;
@@ -123,12 +124,12 @@ class bdpay_sdk
 
         // 查询订单在商户自己系统的状态
         $order_no = $arr_params ['order_no'];
-        $order_state = $this->query_order_state($order_no);
+        $order_state = $this->queryOrderState($order_no);
         $this->log(sprintf('order state in sp server is [%s]', $order_state));
-        if (sp_conf::SP_PAY_RESULT_WAITING == $order_state) {
+        if (BdpayConfig::SP_PAY_RESULT_WAITING == $order_state) {
             $this->log('the order state is right, the order is waiting for pay');
             return true;
-        } elseif (sp_conf::SP_PAY_RESULT_SUCCESS == $order_state) {
+        } elseif (BdpayConfig::SP_PAY_RESULT_SUCCESS == $order_state) {
             $this->log('the order state is wrong, this order has been paid');
             $this->err_msg = '订单[%s]已经处理，此百度钱包后台支付通知为重复通知';
             return false;
@@ -147,9 +148,9 @@ class bdpay_sdk
      *        中必须包含以下部分，百度钱包只有接收到特定的响应信息后，才能确认商户已经收到通知，并验证通过。这样
      *        百度钱包才不会再向商户发送支付结果通知
      */
-    function notify_bfb()
+    function notifyBaifubao()
     {
-        $rep_str = "<html><head>" . sp_conf::BFB_NOTIFY_META .
+        $rep_str = "<html><head>" . BdpayConfig::BFB_NOTIFY_META .
             "</head><body><h1>这是一个return_url页面</h1></body></html>";
         echo "$rep_str";
     }
@@ -163,12 +164,12 @@ class bdpay_sdk
      * @return int 如果订单处于等待支付状态，返回sp_conf::SP_PAY_RESULT_WAITING
      *         其它情况用户也可以自己定义
      */
-    private function query_order_state($order_no)
+    private function queryOrderState($order_no)
     {
         /*
          * 这里需要商户自己实现查询的相关业务逻辑,我这里只是简单的返回等待支付
          */
-        return sp_conf::SP_PAY_RESULT_WAITING;
+        return BdpayConfig::SP_PAY_RESULT_WAITING;
     }
 
     /**
@@ -177,21 +178,21 @@ class bdpay_sdk
      * @param string $order_no
      * @return string | boolean 订单支付成功返回订单查询结果，其它情况（包括查询失败以及支付状态不是支付成功的情况）返回false
      */
-    function query_baifubao_pay_result_by_order_no($order_no)
+    function queryBaifubaoPayResultByOrderNo($order_no)
     {
         $params = array(
-            'service_code' => sp_conf::BFB_QUERY_INTERFACE_SERVICE_ID, // 查询接口的服务ID号
-            'sp_no' => sp_conf::$SP_NO,
+            'service_code' => BdpayConfig::BFB_QUERY_INTERFACE_SERVICE_ID, // 查询接口的服务ID号
+            'sp_no' => BdpayConfig::$SP_NO,
             'order_no' => $order_no,
-            'output_type' => sp_conf::BFB_INTERFACE_OUTPUT_FORMAT, // 百度钱包返回XML格式的结果
-            'output_charset' => sp_conf::BFB_INTERFACE_ENCODING, // 百度钱包返回GBK编码的结果
-            'version' => sp_conf::BFB_INTERFACE_VERSION,
-            'sign_method' => sp_conf::SIGN_METHOD_MD5
+            'output_type' => BdpayConfig::BFB_INTERFACE_OUTPUT_FORMAT, // 百度钱包返回XML格式的结果
+            'output_charset' => BdpayConfig::BFB_INTERFACE_ENCODING, // 百度钱包返回GBK编码的结果
+            'version' => BdpayConfig::BFB_INTERFACE_VERSION,
+            'sign_method' => BdpayConfig::SIGN_METHOD_MD5
         );
 
         // 百度钱包订单号查询接口参数，具体的参数取值参见接口文档
 
-        if (false === ($sign = $this->make_sign($params))) {
+        if (false === ($sign = $this->makeSign($params))) {
             $this->log(
                 'make sign for query baifubao pay result interface failed');
             return false;
@@ -199,13 +200,13 @@ class bdpay_sdk
         $params ['sign'] = $sign;
         $params_str = http_build_query($params);
 
-        $query_url = sp_conf::BFB_QUERY_ORDER_URL . '?' . $params_str;
+        $query_url = BdpayConfig::BFB_QUERY_ORDER_URL . '?' . $params_str;
         $this->log(
             sprintf('the url of query baifubao pay result is [%s]',
                 $query_url));
         $content = $this->request($query_url);
         $retry = 0;
-        while (empty($content) && $retry < sp_conf::BFB_QUERY_RETRY_TIME) {
+        while (empty($content) && $retry < BdpayConfig::BFB_QUERY_RETRY_TIME) {
             $content = $this->request($query_url);
             $retry++;
         }
@@ -256,14 +257,14 @@ class bdpay_sdk
             return false;
         }
         // 检查商户ID是否是自己，如果传过来的sp_no不是商户自己的，那么说明这个百度钱包的订单查询接口的响应数据无效
-        if (sp_conf::$SP_NO != $response_arr ['sp_no']) {
+        if (BdpayConfig::$SP_NO != $response_arr ['sp_no']) {
             $this->log(
                 'the sp_no returned from baifubao pay result interface is invaild');
             $this->err_msg = '百度钱包的订单查询接口的响应数据中商户ID无效，该通知无效';
             return false;
         }
         // 检查订单查询接口的响应数据中的支付结果是否为支付成功
-        if (sp_conf::BFB_PAY_RESULT_SUCCESS != $response_arr ['pay_result']) {
+        if (BdpayConfig::BFB_PAY_RESULT_SUCCESS != $response_arr ['pay_result']) {
             $this->log(
                 sprintf(
                     'the pay result returned from baifubao pay result interface is invalid, is [%s]',
@@ -280,7 +281,7 @@ class bdpay_sdk
                 $response_arr ['buyer_sp_username']);
         }
         // 校验返回结果中的签名
-        if (false === $this->check_sign($response_arr)) {
+        if (false === $this->checkSign($response_arr)) {
             $this->log(
                 'sign the result returned from baifubao pay result interface failed');
             $this->err_msg = '百度钱包订单查询接口响应数据签名校验失败';
@@ -303,12 +304,12 @@ class bdpay_sdk
      * @param array $params 生成签名的数组
      * @return string | boolean 成功返回生成签名，失败返回false
      */
-    private function make_sign($params)
+    private function makeSign($params)
     {
         if (is_array($params)) {
             // 对参数数组进行按key升序排列
             if (ksort($params)) {
-                if (false === ($params ['key'] = $this->get_sp_key())) {
+                if (false === ($params ['key'] = $this->getSpKey())) {
                     return false;
                 }
                 $arr_temp = array();
@@ -317,9 +318,9 @@ class bdpay_sdk
                 }
                 $sign_str = implode('&', $arr_temp);
                 // 选择相应的加密算法
-                if ($params ['sign_method'] == sp_conf::SIGN_METHOD_MD5) {
+                if ($params ['sign_method'] == BdpayConfig::SIGN_METHOD_MD5) {
                     return md5($sign_str);
-                } else if ($params ['sign_method'] == sp_conf::SIGN_METHOD_SHA1) {
+                } else if ($params ['sign_method'] == BdpayConfig::SIGN_METHOD_SHA1) {
                     return sha1($sign_str);
                 } else {
                     $this->log('unsupported sign method');
@@ -348,7 +349,7 @@ class bdpay_sdk
      * @param array $params 生成签名的参数数组
      * @return boolean    生成签名成功返回true, 失败返回false
      */
-    private function check_sign($params)
+    private function checkSign($params)
     {
         $sign = $params ['sign'];
         unset($params ['sign']);
@@ -356,7 +357,7 @@ class bdpay_sdk
             $value = urldecode($value); // URL编码的解码
         }
         unset($value);
-        if (false !== ($my_sign = $this->make_sign($params))) {
+        if (false !== ($my_sign = $this->makeSign($params))) {
             if (0 !== strcmp($my_sign, $sign)) {
                 return false;
             }
@@ -372,9 +373,9 @@ class bdpay_sdk
      *
      * @return string    返回商户的百度钱包密钥
      */
-    private function get_sp_key()
+    private function getSpKey()
     {
-        $key = sp_conf::$SP_KEY;
+        $key = BdpayConfig::$SP_KEY;
         if (empty($key)) {
             $this->log(sprintf('can not find the sp key, file [%s]', $key));
             return false;
@@ -425,14 +426,14 @@ class bdpay_sdk
      */
     function log($msg)
     {
-        if (defined(sp_conf::$LOG_FILE)) {
+        if (defined(BdpayConfig::$LOG_FILE)) {
             error_log(
                 sprintf("[%s] [order_no: %s] : %s\n", date("Y-m-d H:i:s"),
                     $this->order_no, $msg));
         } else {
             error_log(
                 sprintf("[%s] [order_no: %s] : %s\n", date("Y-m-d H:i:s"),
-                    $this->order_no, $msg), 3, sp_conf::$LOG_FILE);
+                    $this->order_no, $msg), 3, BdpayConfig::$LOG_FILE);
         }
     }
 }
