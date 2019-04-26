@@ -1,10 +1,11 @@
 <?php
-namespace Shark\Library\Service\pay\wxpay\lib;
 /**
  * 回调基础类
  *
  * @author widyhu
  */
+namespace EasyPayment\payment\wxpay\lib;
+
 class WxPayNotify extends WxPayNotifyReply
 {
 

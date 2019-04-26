@@ -1,9 +1,10 @@
 <?php
-namespace Shark\Library\Service\pay\wxpay\lib;
+
+namespace EasyPayment\payment\wxpay\lib;
 require_once "WxPay.Api.php";
 require_once "WxPay.Config.php";
 
-class JsApiPay
+class WxPayJsApiPay
 {
     public $data = null;
     private $curl_timeout = 10;

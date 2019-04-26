@@ -1,5 +1,5 @@
 <?php
-namespace Shark\Library\Service\pay\wxpay\lib;
+namespace EasyPayment\payment\wxpay\lib;
 require_once "WxPay.Exception.php";
 require_once "WxPay.Data.php";
 require_once "WxPay.Config.php";

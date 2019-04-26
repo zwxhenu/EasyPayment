@@ -2,8 +2,6 @@
 /**
  * 微信支付操作类
  *
- * @author dxk
- * @version 2016-07-26
  */
 namespace Shark\Library\Service\pay\wxpay;
 

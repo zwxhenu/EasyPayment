@@ -1,11 +1,12 @@
 <?php
-namespace Shark\Library\Service\pay\wxpay\lib;
+
+namespace EasyPayment\payment\wxpay\lib;
 require_once "WxPay.Api.php";
 
 /**
  * 刷卡支付实现类
  */
-class NativePay
+class WxPayNativePay
 {
 
     /**

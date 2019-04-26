@@ -2,7 +2,8 @@
 /**
  * 配置账号信息
  */
-namespace Shark\Library\Service\pay\wxpay\lib;
+namespace EasyPayment\payment\wxpay\lib;
+
 class WxPayConfig
 {
     public static $APPID = '';

@@ -1,5 +1,7 @@
 <?php
-namespace Shark\Library\Service\pay\wxpay\lib;
+
+namespace EasyPayment\payment\wxpay\lib;
+
 class WxPayException extends \Exception
 {
 
