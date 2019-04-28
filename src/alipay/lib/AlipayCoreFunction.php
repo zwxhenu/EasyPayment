@@ -68,6 +68,7 @@ class AlipayCoreFunction
             else
                 $para_filter[$key] = $para[$key];
         }
+
         return $para_filter;
     }
 
@@ -81,6 +82,7 @@ class AlipayCoreFunction
     {
         ksort($para);
         reset($para);
+
         return $para;
     }
 

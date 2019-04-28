@@ -10,7 +10,11 @@ use EasyPayment\payment\AlipayConfigContract;
 use EasyPayment\payment\PayContract;
 use EasyPayment\payment\PayCommon;
 use EasyPayment\payment\alipay\lib\AlipayNotify;
-class alipayService implements PayContract,AlipayConfigContract
+//require_once '/alipay/lib/AlipaySubmit.php';
+//require_once  './../src/PayCommon.php';
+//require_once  './../src/PayContract.php';
+//require_once 'AlipayConfigContract.php';
+class AlipayService implements PayContract,AlipayConfigContract
 {
 
     /***发起支付配置***/
@@ -98,19 +102,19 @@ class alipayService implements PayContract,AlipayConfigContract
      *
      * @var string
      */
-    private $partner = '2088421749717068';
+    private $partner = '';
     /**
      * 收款支付宝账号，以2088开头由16位纯数字组成的字符串，一般情况下收款账号就是签约账号
      *
      * @var string
      */
-    private $seller_id = '2088421749717068';
+    private $seller_id = '';
     /**
      * MD5密钥，安全检验码，由数字和字母组成的32位字符串，查看地址：https://b.alipay.com/order/pidAndKey.htm
      *
      * @var string
      */
-    private $key = 'g3a99ar2vtp0l7784pqw9lh1apt0is30';
+    private $key = '';
     private $pay_common_obj = null;
     public function __construct()
     {
@@ -339,9 +343,11 @@ class alipayService implements PayContract,AlipayConfigContract
     public function setBody($body)
     {
         $body = trim($body);
-        $body = trim_print($body);
+        $search = array(',', "'", "\r\n", "\n", "\r", "\t");
+        $replace = array('，', '’', ' ', ' ', ' ', ' ');
+        $body = str_ireplace($search, $replace, $body);
         // body不超过60个字符
-        $body = str_limit($body, 60);
+        $body = mb_substr($body, 0,  60);
         $this->body = $body;
         return $this;
     }
@@ -438,7 +444,7 @@ class alipayService implements PayContract,AlipayConfigContract
         /* ------------------ 构造要请求的参数数组，无需改动---------------- */
         // 其他业务参数根据在线开发文档，添加参数.文档地址:https://doc.open.alipay.com/doc2/detail.htm?spm=a219a.7629140.0.0.kiX33I&treeId=62&articleId=103740&docType=1
         // 如"参数名" => "参数值" 注：上一个参数末尾需要“,”逗号。
-        $params = [
+        $params = array(
             "service" => $alipay_config['service'],
             "partner" => $alipay_config['partner'],
             "seller_id" => $alipay_config['seller_id'],
@@ -453,7 +459,7 @@ class alipayService implements PayContract,AlipayConfigContract
             "show_url" => $this->showUrl,
             "extra_common_param" => $this->order_sn,
             "body" => $this->body
-        ];
+        );
         if ($this->is_wap === false) {
             $params['anti_phishing_key'] = $alipay_config['anti_phishing_key'];
             $params['exter_invoke_ip'] = $alipay_config['exter_invoke_ip'];
@@ -475,13 +481,13 @@ class alipayService implements PayContract,AlipayConfigContract
     {
         //查询支付信息
         $pay_config = $this->getPayQueryOrderConfig();
-        $parameter = [
+        $parameter = array(
             "service" => "single_trade_query",
             "partner" => $pay_config['partner'],
             "trade_no" => $trade_no,  // 支付宝交易流水号
             "out_trade_no" => $out_trade_no,  // 商户网站订单系统中唯一订单号，必填
             "_input_charset" => trim(strtolower($pay_config['input_charset']))
-        ];
+        );
         // 建立请求
         $alipaySubmit = new AlipaySubmit($pay_config);
         $html_text = $alipaySubmit->buildRequestHttp($parameter);
@@ -549,7 +555,7 @@ class alipayService implements PayContract,AlipayConfigContract
         // 系统单号
         $out_trade_no_t = explode('-', $out_trade_no);
         $order_sn = $out_trade_no_t[0];
-        $data = [];
+        $data = array();
         $data['trade_no'] = $trade_no;
         if (empty($out_trade_no) || empty($trade_no) || $pay_money <= 0 || empty($order_sn)) {
             return $this->pay_common_obj->alertInfo(1, '回传数据异常', $data);

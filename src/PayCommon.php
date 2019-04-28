@@ -20,8 +20,8 @@ class PayCommon
      */
     public function trimPrint($subject)
     {
-        $search = [',', "'", "\r\n", "\n", "\r", "\t"];
-        $replace = ['，', '’', ' ', ' ', ' ', ' '];
+        $search = array(',', "'", "\r\n", "\n", "\r", "\t");
+        $replace = array('，', '’', ' ', ' ', ' ', ' ');
 
         return str_ireplace($search, $replace, $subject);
     }
@@ -211,7 +211,7 @@ class PayCommon
      * @param int $timeout 超时时间
      * @return bool|mixed
      */
-    public function curlPost($url, $postFields = [], $timeout = 20)
+    public function curlPost($url, $postFields = array(), $timeout = 20)
     {
         $ch = curl_init();
         curl_setopt($ch, CURLOPT_URL, $url);
@@ -268,7 +268,7 @@ class PayCommon
      * @param int $timeout 超时时间
      * @return bool|mixed
      */
-    public function curlGet($url, $getFields = [], $timeout = 20)
+    public function curlGet($url, $getFields = array(), $timeout = 20)
     {
         if (is_array($getFields) && 0 < count($getFields)) {
             $getBodyString = "";
@@ -349,9 +349,9 @@ class PayCommon
 
         if (empty($valid_fields)) {
             if ($is_obj) {
-                return (object)[];
+                return (object)array();
             } else {
-                return [];
+                return array();
             }
         }
 

@@ -175,6 +175,8 @@ class BdpayService implements PayContract
         // 加载配置文件
         BdpayConfig::$SP_NO = $this->sp_no;
         BdpayConfig::$SP_KEY = $this->sp_key;
+        BdpayConfig::$NOTIFY_URL = $this->success_url;
+        BdpayConfig::$RETURN_URL = $this->success_url;
         /* -----------------------请求参数--------------------------- */
         // 商户订单号，商户网站订单系统中唯一订单号，必填
         if (empty($this->order_sn)) {
@@ -201,13 +203,13 @@ class BdpayService implements PayContract
          * = iconv("UTF-8", "GBK", urldecode($good_desc));
          */
         // 商户请求支付接口的表单参数，具体的表单参数各项的定义和取值参见接口文档
-        $params = [
+        $params = array(
             'service_code' => BdpayConfig::BFB_PAY_INTERFACE_SERVICE_ID,
             'sp_no' => BdpayConfig::$SP_NO,
             'order_create_time' => date("YmdHis"),
             'order_no' => $this->out_trade_no,
-            'goods_name' => iconv("UTF-8", "GBK", urldecode($this->subject)),
-            'goods_desc' => iconv("UTF-8", "GBK", urldecode($this->body)),
+            'goods_name' =>  $this->subject,
+            'goods_desc' =>  $this->body,
             'goods_url' => $this->showUrl,
             'unit_amount' => '',
             'unit_count' => '',
@@ -224,14 +226,14 @@ class BdpayService implements PayContract
             'version' => BdpayConfig::BFB_INTERFACE_VERSION,
             'sign_method' => BdpayConfig::SIGN_METHOD_MD5,
             'extra' => $this->order_sn
-        ];
+        );
         $bdpay_sdk = new BdpaySdk();
         $order_url = $bdpay_sdk->createBaifubaoPayOrderUrl($params, $apiurl);
         if (false === $order_url) {
             return $this->pay_common_obj->alertInfo(1, '发起支付失败');
         }
         $order_url = "<script>window.location=\"" . $order_url . "\";</script>";
-        $data = ['html_text' => $order_url, 'pay_type_id' => $this->pay_type_id, 'out_trade_no' => $this->out_trade_no, 'mchid'=>$this->sp_no];
+        $data = array('html_text' => $order_url, 'pay_type_id' => $this->pay_type_id, 'out_trade_no' => $this->out_trade_no, 'mchid'=>$this->sp_no);
 
         return $this->pay_common_obj->alertInfo(0, '', $data);
     }
@@ -284,7 +286,7 @@ class BdpayService implements PayContract
         $pay_money = round($pay_money / 100, 2);
         // 系统单号
         //$order_sn = trim($_GET['extra']);
-        $data = [];
+        $data = array();
         $data['trade_no'] = $trade_no;
         $pay_success_url = base64_decode($this->success_url);
         $pay_error_url = base64_decode($this->error_url);
