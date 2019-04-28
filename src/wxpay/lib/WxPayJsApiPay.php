@@ -1,8 +1,9 @@
 <?php
 
 namespace EasyPayment\payment\wxpay\lib;
-require_once "WxPay.Api.php";
-require_once "WxPay.Config.php";
+
+use EasyPayment\payment\wxpay\lib\WxPayConfig;
+use EasyPayment\payment\wxpay\lib\WxPayApi;
 
 class WxPayJsApiPay
 {
@@ -38,7 +39,7 @@ class WxPayJsApiPay
         if (!array_key_exists("appid", $UnifiedOrderResult) || !array_key_exists("prepay_id", $UnifiedOrderResult) || $UnifiedOrderResult['prepay_id'] == "") {
             throw new WxPayException("参数错误");
         }
-        $jsapi = new WxPayJsApiPay();
+        $jsapi = new WxPayJsApiPayData();
         $jsapi->SetAppid($UnifiedOrderResult["appid"]);
         $timeStamp = time();
         $jsapi->SetTimeStamp("$timeStamp");

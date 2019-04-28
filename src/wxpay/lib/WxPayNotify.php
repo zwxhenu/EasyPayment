@@ -2,9 +2,11 @@
 /**
  * 回调基础类
  *
- * @author widyhu
  */
 namespace EasyPayment\payment\wxpay\lib;
+
+use EasyPayment\payment\wxpay\lib\WxPayNotifyReply;
+use EasyPayment\payment\wxpay\lib\WxPayApi;
 
 class WxPayNotify extends WxPayNotifyReply
 {
