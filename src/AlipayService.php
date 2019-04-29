@@ -10,10 +10,6 @@ use EasyPayment\payment\AlipayConfigContract;
 use EasyPayment\payment\PayContract;
 use EasyPayment\payment\PayCommon;
 use EasyPayment\payment\alipay\lib\AlipayNotify;
-//require_once '/alipay/lib/AlipaySubmit.php';
-//require_once  './../src/PayCommon.php';
-//require_once  './../src/PayContract.php';
-//require_once 'AlipayConfigContract.php';
 class AlipayService implements PayContract,AlipayConfigContract
 {
 

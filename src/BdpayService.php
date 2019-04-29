@@ -8,6 +8,7 @@ use EasyPayment\payment\bdpay\lib\BdpaySdk;
 use EasyPayment\payment\PayContract;
 use EasyPayment\payment\bdpay\lib\BdpayConfig;
 use EasyPayment\payment\PayCommon;
+
 class BdpayService implements PayContract
 {
     private $out_trade_no = '';

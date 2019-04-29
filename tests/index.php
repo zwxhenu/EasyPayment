@@ -9,9 +9,9 @@ use EasyPayment\payment\WxPayService;
 require './../vendor/autoload.php';
 /*********支付宝*************/
 //$pay = new AlipayService();
-//$pay->setPartner('2088421749717068');
-//$pay->setSellerId('2088421749717068');
-//$pay->setKey('g3a99ar2vtp0l7784pqw9lh1apt0is30');
+//$pay->setPartner(''); // 合作商户
+//$pay->setSellerId(''); // 合作商户ID
+//$pay->setKey(''); // 合作商户支付秘钥
 //$pay->setOrderSn('13354666');
 //$pay->setPayMoney('0.01');
 //$pay->setSubject('֧测试支付');
@@ -24,8 +24,8 @@ require './../vendor/autoload.php';
 
 /**************百度钱包************/
 //$bd_pay = new BdpayService();
-//$bd_pay->setSpNo('1000432090');
-//$bd_pay->setSpKey('zeVw3TPfeRzcHbvDbXnYQeAujVds2A4A');
+//$bd_pay->setSpNo(''); // 合作商户ID
+//$bd_pay->setSpKey(''); // 合作支付秘钥
 //$bd_pay->setOrderSn('123456789');
 //$bd_pay->setPayMoney('0.01');
 //$bd_pay->setSubject('֧测试支付');
@@ -37,11 +37,22 @@ require './../vendor/autoload.php';
 //echo $res['data']['html_text'];exit;
 
 /**************微信二维码支付************/
+/**
+ * 微信公众号信息配置
+ * APPID：绑定支付的APPID（必须配置）
+ * MCHID：商户号（必须配置）
+ * KEY：商户支付密钥，参考开户邮件设置（必须配置）
+ * APPSECRET：公众帐号secert（仅JSAPI支付的时候需要配置）
+ **/
 $wx_qrcode_pay = new WxPayService();
-$wx_qrcode_pay->setMchId('1371844302');
-$wx_qrcode_pay->setAppSecret('28878558efc10dcc4037e8077b0ba077');
-$wx_qrcode_pay->setAppId('wxef13238200cbd24c');
-$wx_qrcode_pay->setKey('d95e587f5dbab4a6007de1d228831fd4');
+// 商户号（必须配置）
+$wx_qrcode_pay->setMchId('');
+// 公众帐号secert（仅JSAPI支付的时候需要配置）
+$wx_qrcode_pay->setAppSecret('');
+// 绑定支付的APPID
+$wx_qrcode_pay->setAppId('');
+// KEY：商户支付密钥，参考开户邮件设置（必须配置）
+$wx_qrcode_pay->setKey('');
 $wx_qrcode_pay->setOrderSn('12345689');
 $wx_qrcode_pay->setOutOrderNo('4567891');
 $wx_qrcode_pay->setPayMoney(0.01);
@@ -56,10 +67,10 @@ echo $_SERVER['HTTP_HOST'].'/'.$qrcode;
 
 /**************微信支付************/
 //$wx_pay = new WxPayService();
-//$wx_pay->setMchId('1371844302');
-//$wx_pay->setAppSecret('28878558efc10dcc4037e8077b0ba077');
-//$wx_pay->setAppId('wxef13238200cbd24c');
-//$wx_pay->setKey('d95e587f5dbab4a6007de1d228831fd4');
+//$wx_pay->setMchId('');
+//$wx_pay->setAppSecret('');
+//$wx_pay->setAppId('');
+//$wx_pay->setKey('');
 //$wx_pay->setIsWap(true);
 //$wx_pay->setOrderSn('123456789');
 //$wx_pay->setPayMoney(0.01);
