@@ -16,6 +16,7 @@ use EasyPayment\payment\wxpay\lib\WxPayApi;
 use EasyPayment\payment\wxpay\lib\WxPayUnifiedOrder;
 use EasyPayment\payment\wxpay\lib\WxPayNativePay;
 use EasyPayment\payment\wxpay\lib\WxPayOrderQuery;
+use EasyPayment\payment\QrCode;
 
 class WxPayService implements PayContract
 {
@@ -332,8 +333,9 @@ class WxPayService implements PayContract
             return $this->pay_common_obj->alertInfo(1, isset($result['err_code_des']) ? $result['err_code_des'] : $result['return_msg']);
         }
         $url = $result["code_url"];
+        $qrcode = QrCode::make($url, 'wxpay_qrcode', 150);
 
-        return $this->pay_common_obj->alertInfo(0, '', $url);
+        return $this->pay_common_obj->alertInfo(0, '', $qrcode);
     }
     /**
      * 查询订单支付状态
