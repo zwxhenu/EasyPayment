@@ -9,3 +9,6 @@
    <p>&nbsp;&nbsp;支付宝网页版支付</p>
 <h2>3、百度钱包支付</h2>  
    <p>&nbsp;&nbsp;百度钱包网页版支付</p>
+   
+  <br /><hr>   
+<p color="red">该项目暂时未创建自己的composer包，运行方式：clone到本地，在当前目录下执行composer install，然后配置域名访问就可以！</p>
