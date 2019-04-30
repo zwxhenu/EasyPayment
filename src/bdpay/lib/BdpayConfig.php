@@ -21,7 +21,10 @@ final class BdpayConfig
     const SP_PAY_RESULT_SUCCESS = 1;
     // 商户订单等待支付
     const SP_PAY_RESULT_WAITING = 2;
-
+    // 百度钱包退款接口URL
+    const BFB_REFUND_URL = "https://www.baifubao.com/api/0/refund";
+    // 百度钱包退款查询接口URL
+    const BFB_REFUND_QUERY_URL = "https://www.baifubao.com/api/0/refund/0/query";
     // 百度钱包PC端即时到账支付接口URL（需要用户登录百度钱包）
     const BFB_PAY_DIRECT_LOGIN_URL = "https://www.baifubao.com/api/0/pay/0/direct/0";
     // 百度钱包PC端即时到账支付接口URL（免登录百度钱包 xyz增加）
@@ -46,6 +49,10 @@ final class BdpayConfig
     const BFB_PAY_INTERFACE_SERVICE_ID = 1;
     // 百度钱包查询接口服务ID
     const BFB_QUERY_INTERFACE_SERVICE_ID = 11;
+    // 百度钱包退款接口服务ID
+    const BFB_REFUND_INTERFACE_SERVICE_ID = 2;
+    // 百度钱包退款查询接口服务ID
+    const BFB_REFUND_QUERY_INTERFACE_SERVICE_ID = 12;
     // 百度钱包接口版本
     const BFB_INTERFACE_VERSION = 2;
     // 百度钱包接口字符编码

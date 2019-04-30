@@ -290,11 +290,231 @@ class BdpaySdk
 
         return $response_arr;
     }
+    /**
+     * 生成百度钱包退款接口对应的URL
+     *
+     * @param array $params	生成退款请求的参数数组，具体参数的取值参见接口文档
+     * @param string $url   百度钱包退款接口URL
+     * @return string 返回生成的百度钱包退款接口URL
+     */
+    function createBaiFuBaoRefundUrl($params, $url) {
+        if (empty($params ['service_code']) || empty($params ['input_charset']) ||
+            empty($params ['sign_method']) ||
+            empty($params ['output_type']) ||
+            empty($params ['output_charset']) ||
+            empty($params ['return_url']) ||
+            empty($params ['return_method']) ||
+            empty($params ['version']) ||
+            empty($params ['sp_no']) ||
+            empty($params ['order_no']) ||
+            empty($params ['cashback_amount']) ||
+            empty($params ['cashback_time']) ||
+            empty($params ['currency'])||
+            empty($params ['sp_refund_no'])
+        ) {
+            $this->log(sprintf('invalid params, params:[%s]', print_r($params, true)));
+            print_r("结束2yu2create_baifubao_Refund_url");
+            return false;
+        }
+        print_r("结束3"+$url);
+        if (!in_array($url,
+            array (
+                BdpayConfig::BFB_REFUND_URL,
+                BdpayConfig::BFB_REFUND_QUERY_URL,
+            ))) {
+            $this->log(
+                sprintf('invalid url[%s], bfb just provide three kind of pay url',
+                    $url));
+            return false;
+        }
+
+        $refund_url = $url;
+
+        if (false === ($sign = $this->makeSign($params))) {
+            return false;
+        }
+        $this->order_no = $params ['order_no'];
+        $params ['sign'] = $sign;
+        $params_str = http_build_query($params);
+        $this->log(
+            sprintf('the params that create baifubao pay order is [%s]',
+                $params_str));
+
+        return $refund_url . '?' . $params_str;
+    }
 
     /**
+     * 当收到百度钱包的退款结果通知后，return_url页面需要做的预处理工作
+     * 该方法放在商户配置的return_url的页面的处理逻辑里，当收到该页面的get请求时，
+     * 预先进行参数验证，签名校验，订单查询，然后才是商户对该订单的处理流程。
+     *
+     * @return boolean 预处理成功返回true，否则返回false
+     */
+    function checkBaifubaoRefundResultNotify() {
+        // 检查请求的必选参数，具体的参数参见接口文档
+        if (empty($_GET) || !isset($_GET ['bfb_order_no']) || !isset(
+                $_GET ['cashback_amount']) || !isset($_GET ['order_no']) ||
+            !isset($_GET ['ret_code']) ||
+            !isset($_GET ['sign_method']) || !isset($_GET ['sp_no']) ||
+            !isset($_GET ['sp_refund_no']) || !isset($_GET ['sign'])) {
+            $this->err_msg = 'return_url页面的请求的必选参数不足';
+            $this->log(
+                sprintf('missing the params of return_url page, params[%s]',
+                    print_r($_GET)));
+            return false;
+        }
+        $arr_params = $_GET;
+        $this->order_no = $arr_params ['order_no'];
+        // 检查商户ID是否是自己，如果传过来的sp_no不是商户自己的，那么说明这个百度钱包的支付结果通知无效
+        if (BdpayConfig::$SP_NO != $arr_params ['sp_no']) {
+            $this->err_msg = '百度钱包退款通知中商户ID无效，该通知无效';
+            $this->log(
+                'the id in baifubao notify is wrong, this notify is invaild');
+            return false;
+        }
+        // 签名校验
+        if (false === $this->checkSign($arr_params)) {
+            print_r('签名失败');
+            $this->err_msg = '百度钱包后台通知签名校验失败';
+            $this->log('baifubao notify sign failed');
+            return false;
+        }
+        $this->log('baifubao notify sign success');
+
+        // 通过百度钱包退款查询接口再次查询订单状态，二次校验
+        // 该查询接口存在一定的延迟，商户也可以不用二次校验，信任后台的支付结果通知便行
+
+        // 调用query_order_state($order_no)方法查询订单在商户自己系统的状态
+        //如果返回的ret_code状态是1、2和3（1退款成功,2退款失败，3退款到余额，订单状态已经修改），则代表是重复通知
+        //query_order_state($order_no);
+
+        return true;
+    }
+    /**
+     * 按商户订单号查询退款信息，返回该订单是否已经退款成功
+     *
+     * @param string $order_no
+     * @return string | boolean 请求成功返回订单查询结果，其它情况
+    （包括查询失败以及签名错误等情况）返回false
+     */
+    function queryBaifubaoRefundResultByOrderNo($order_no) {
+        $params = array (
+            'service_code' => BdpayConfig::BFB_REFUND_QUERY_INTERFACE_SERVICE_ID, // 查询接口的服务ID号
+            'sp_no' => BdpayConfig::$SP_NO,
+            'order_no' => $order_no,
+            'output_type' => BdpayConfig::BFB_INTERFACE_OUTPUT_FORMAT, // 百度钱包返回XML格式的结果
+            'output_charset' => BdpayConfig::BFB_INTERFACE_ENCODING, // 百度钱包返回GBK编码的结果
+            'version' => BdpayConfig::BFB_INTERFACE_VERSION,
+            'sign_method' => BdpayConfig::SIGN_METHOD_MD5
+        );
+
+        // 百度钱包订单号退款查询接口参数，具体的参数取值参见接口文档
+
+        if (false === ($sign = $this->makeSign($params))) {
+            $this->log(
+                'make sign for query baifubao refund result interface failed');
+            return false;
+        }
+        $params ['sign'] = $sign;
+        $params_str = http_build_query($params);
+
+        $query_url = BdpayConfig::BFB_REFUND_QUERY_URL . '?' . $params_str;
+        $this->log(
+            sprintf('the url of query baifubao refund result is [%s]',
+                $query_url));
+        $content = $this->request($query_url);
+        $retry = 0;
+        while (empty($content) && $retry < BdpayConfig::BFB_QUERY_RETRY_TIME) {
+            $content = $this->request($query_url);
+            $retry++;
+        }
+        if (empty($content)) {
+            $this->err_msg = '调用百度钱包退款查询接口失败';
+            return false;
+        }
+        $this->log(
+            sprintf('the result from baifubao query pay result is [%s]',
+                $content));
+        $response_arr = json_decode(
+            json_encode(simplexml_load_string($content)), true);
+        // 上句解析xml文件时，如果某字段没有取值时，会被解析成一个空的数组，对于没有取值的情况，都默认设为空字符串
+        foreach ($response_arr as &$value) {
+            if (empty($value) && is_array($value)) {
+                $value = '';
+            }
+        }
+        unset($value);
+
+        return print_r($response_arr, true);
+    }
+    /**
+     * 通过百度钱包按退款流水号号查询退款信息，返回该订单是否已经退款成功
+     *
+     * @param string $order_no 订单号
+     * @param string $sp_refund_no 外部商户退款流水号
+     * @return string | boolean 请求成功返回订单查询结果，其它情况
+    （包括查询失败以及签名错误等情况）返回false
+     */
+    function queryBaifubaoRefundResultBySprefundNo($order_no,$sp_refund_no) {
+        $params = array (
+            'service_code' => BdpayConfig::BFB_QUERY_INTERFACE_SERVICE_ID, // 查询接口的服务ID号
+            'sp_no' => BdpayConfig::$SP_NO,
+            'order_no' => $order_no,
+            'sp_refund_no' => $sp_refund_no,
+            'output_type' => BdpayConfig::BFB_INTERFACE_OUTPUT_FORMAT, // 百度钱包返回XML格式的结果
+            'output_charset' => BdpayConfig::BFB_INTERFACE_ENCODING, // 百度钱包返回GBK编码的结果
+            'version' => BdpayConfig::BFB_INTERFACE_VERSION,
+            'sign_method' => BdpayConfig::SIGN_METHOD_MD5
+        );
+
+        // 百度钱包订单号退款查询接口参数，具体的参数取值参见接口文档
+
+        if (false === ($sign = $this->makeSign($params))) {
+            $this->log(
+                'make sign for query baifubao refund result interface failed');
+            return false;
+        }
+        $params ['sign'] = $sign;
+        $params_str = http_build_query($params);
+
+        $query_url = BdpayConfig::BFB_REFUND_QUERY_URL . '?' . $params_str;
+        $this->log(
+            sprintf('the url of query baifubao refund result is [%s]',
+                $query_url));
+        $content = $this->request($query_url);
+        $retry = 0;
+        while (empty($content) && $retry < BdpayConfig::BFB_QUERY_RETRY_TIME) {
+            $content = $this->request($query_url);
+            $retry++;
+        }
+        if (empty($content)) {
+            $this->err_msg = '调用百度钱包退款查询接口失败';
+            return false;
+        }
+        $this->log(
+            sprintf('the result from baifubao query pay result is [%s]',
+                $content));
+        $response_arr = json_decode(
+            json_encode(simplexml_load_string($content)), true);
+        // 上句解析xml文件时，如果某字段没有取值时，会被解析成一个空的数组，对于没有取值的情况，都默认设为空字符串
+        foreach ($response_arr as &$value) {
+            if (empty($value) && is_array($value)) {
+                $value = '';
+            }
+        }
+        unset($value);
+
+        // 将可能出现中文的字段按照查询接口中定义的编码方式进行转码，此处测试是用的GBK编码
+        if (isset($response_arr ['ret_details'])) {
+            $response_arr ['ret_details'] = iconv("UTF-8", "GBK",
+                $response_arr ['ret_details']);
+        }
+
+        return print_r($response_arr, true);
+    }
+    /**
      * 计算数组的签名，传入参数为数组，算法如下：
-     * 1.
-     * 对数组按KEY进行升序排序
+     * 1. 对数组按KEY进行升序排序
      * 2. 在排序后的数组中添加商户密钥，键名为key，键值为商户密钥
      * 3. 将数组拼接成字符串，以key=value&key=value的形式进行拼接，注意这里不能直接调用
      * http_build_query方法，因为该方法会对参数进行URL编码

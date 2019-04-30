@@ -11,18 +11,108 @@ use EasyPayment\payment\PayCommon;
 
 class BdpayService implements PayContract
 {
+    /**
+     * 商户订单流水号
+     *
+     * @var string
+     */
     private $out_trade_no = '';
+    /**
+     * 支付金额
+     *
+     * @var int
+     */
     private $pay_money = 0;
+    /**
+     * 描述
+     * @var string
+     */
     private $subject = '';
+    /**
+     * 商品简介
+     *
+     * @var string
+     */
     private $body = '';
+    /**
+     * 商品详情页
+     *
+     * @var string
+     */
     private $showUrl = '';
+    /**
+     * 交易类型
+     *
+     * @var int
+     */
     private $trade_type = 0;
+    /**
+     * 交易订单号
+     *
+     * @var string
+     */
     private $order_sn = '';
+    /**
+     * 支付成功回调地址
+     *
+     * @var string
+     */
     private $success_url = '';
+    /**
+     * 支付失败回调地址
+     *
+     * @var string
+     */
     private $error_url = '';
+    /**
+     * 是否是wap  true为wap false 为PC
+     *
+     * @var bool
+     */
     private $is_wap = false;
+    /**
+     * 商户ID
+     *
+     * @var string
+     */
     private $sp_no = '';
+    /**
+     * 商户秘钥
+     *
+     * @var string
+     */
     private $sp_key = '';
+    /**
+     * 后台通知请求方式 1 get 2 post 默认post
+     *
+     * @var int
+     */
+    private $method = 2;
+    /**
+     * 退款金额,以分为单位
+     *
+     * @var string
+     */
+    private $cash_back_amount = '';
+    /**
+     * 退款时间
+     *
+     * @var string
+     */
+    private $cash_back_time = '';
+    /**
+     * 退款类型 1 退回钱包余额 2 原路退回
+     * 注：若指定退至钱包余额，但交易为纯网关交易，则自动更改为原路退回。实际退款类型在同步返回结果及退款通知中体现
+     *
+     * @var int
+     */
+    private $refund_type = 2;
+    /**
+     * 分润退款参数
+     *
+     * @var string
+     */
+    private $refund_profit_solution = '';
     private $pay_common_obj = null;
 
     public function __construct()
@@ -30,6 +120,82 @@ class BdpayService implements PayContract
         $this->pay_common_obj = new PayCommon();
     }
 
+    /**
+     * 设置退款金额
+     *
+     * @param $cash_back_amount
+     * @return $this
+     */
+    public function setCashBackAmount($cash_back_amount)
+    {
+        $this->cash_back_amount = $cash_back_amount;
+
+        return $this;
+    }
+    /**
+     * 设置退款时间
+     *
+     * @param $cash_back_time 格式 YYYYMMDDHHMMSS
+     * @return $this
+     */
+    public function setCashBackTime($cash_back_time)
+    {
+        $this->cash_back_time = $cash_back_time;
+
+        return $this;
+    }
+
+    /**
+     * 设置退款类型 1退款到钱包余额 2 为原路退回
+     * 注：若指定退至钱包余额，但交易为纯网关交易，则自动更改为原路退回。实际退款类型在同步返回结果及退款通知中体现。
+     *
+     * @param $refund_type
+     * @return $this
+     */
+    public function setRefundType($refund_type)
+    {
+        $this->refund_type = $refund_type;
+
+        return $this;
+    }
+
+    /**
+     * 设置分润退款
+     *
+     * @param $refund_profit_solution
+     * @return $this
+     */
+    public function setRefundProfitSolution($refund_profit_solution)
+    {
+        $this->refund_profit_solution = $refund_profit_solution;
+
+        return $this;
+    }
+    /**
+     * 后台通知请求方式 1 get 2 post 默认post
+     *
+     * @param $method
+     * @return $this
+     */
+    public function setMethod($method)
+    {
+        $this->method = $method;
+
+        return $this;
+    }
+
+    /**
+     * 设置商户订单流水号
+     *
+     * @param $out_trade_no
+     * @return $this
+     */
+    public function setOutTradeNo($out_trade_no)
+    {
+        $this->out_trade_no = $out_trade_no;
+
+        return $this;
+    }
     /**
      * 是否为WAP支付
      * @param $is_wap
@@ -346,5 +512,88 @@ class BdpayService implements PayContract
         $data['trade_no'] = $trade_info['bfb_order_no'];
 
         return $this->pay_common_obj->alertInfo(0, '成功！', $data);
+    }
+
+    /**
+     * 发起退款
+     *
+     * @return array
+     */
+    public function orderRefund()
+    {
+        // 加载配置文件
+        BdpayConfig::$SP_NO = $this->sp_no;
+        BdpayConfig::$SP_KEY = $this->sp_key;
+        BdpayConfig::$NOTIFY_URL = $this->success_url;
+        BdpayConfig::$RETURN_URL = $this->success_url;
+        $params = array (
+            'service_code' => BdpayConfig::BFB_REFUND_INTERFACE_SERVICE_ID,
+            'input_charset' => BdpayConfig::BFB_INTERFACE_ENCODING,
+            'sign_method' => BdpayConfig::SIGN_METHOD_MD5,
+            'output_type' => BdpayConfig::BFB_INTERFACE_OUTPUT_FORMAT,
+            'output_charset' => BdpayConfig::BFB_INTERFACE_ENCODING,
+            'return_url' => BdpayConfig::$NOTIFY_URL,
+            'return_method' => $this->method,
+            'version' =>  BdpayConfig::BFB_INTERFACE_VERSION,
+            'sp_no' => BdpayConfig::SP_NO,
+            'order_no'=>$this->order_sn,
+            'cashback_amount' => $this->cashback_amount,
+            'cashback_time' => $this->cashback_time,
+            'currency' => BdpayConfig::BFB_INTERFACE_CURRENTCY,
+            'sp_refund_no' => $this->out_trade_no
+        );
+        $bdpay_sdk = new BdpaySdk();
+        $refund_url = $bdpay_sdk->createBaiFuBaoRefundUrl($params, BdpayConfig::BFB_REFUND_URL);
+
+        return $this->pay_common_obj->alertInfo(0, '成功！', array('refund_url' => $refund_url));
+    }
+
+    /**
+     * 退款支付回调处理
+     *
+     * @return array
+     */
+    public function refundNotify()
+    {
+        $bdpay_sdk = new BdpaySdk();
+        $notify_res = $bdpay_sdk->checkBaifubaoRefundResultNotify();
+
+        if(false === $notify_res){
+            return $this->pay_common_obj->alertInfo(1, '失败！');
+        }
+        /**
+         * 处是商户收到百度钱包退款结果通知后需要做的自己的具体业务逻辑，比如修改订单状态之类的。 只有当商户收到百度钱包退款 结果通知后，
+         * 所有的预处理工作都返回正常后，才执行该部分
+         * todo
+         */
+        // 向百度钱包发起回执
+        $bdpay_sdk->notifyBaifubao();
+        return $this->pay_common_obj->alertInfo(0, '成功！');
+    }
+
+    /**
+     * 根据百度钱包退款流水号查询退款信息
+     */
+    public function queryRefundBySpRefundOn()
+    {
+        BdpayConfig::$SP_NO = $this->sp_no;
+        $bdpay_sdk = new BdpaySdk();
+        $query_res = $bdpay_sdk->queryBaifubaoRefundResultBySprefundNo($this->order_sn, $this->out_trade_no);
+
+        return $this->pay_common_obj->alertInfo(0, '成功！', array('content' => $query_res));
+    }
+
+    /**
+     * 根据百度钱包订单号查询退款信息
+     *
+     * @return array
+     */
+    public function queryRefundByOrderOn()
+    {
+        BdpayConfig::$SP_NO = $this->sp_no;
+        $bdpay_sdk = new BdpaySdk();
+        $query_res = $bdpay_sdk->queryBaifubaoRefundResultBySprefundNo($this->order_sn);
+
+        return $this->pay_common_obj->alertInfo(0, '成功！', array('content' => $query_res));
     }
 }

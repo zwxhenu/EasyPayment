@@ -33,8 +33,8 @@ $query_res = $query_pay->queryOrder($trade_no, $out_trade_no);
 
 /**************百度钱包************/
 $bd_pay = new BdpayService();
-$bd_pay->setSpNo(''); // 合作商户ID
-$bd_pay->setSpKey(''); // 合作支付秘钥
+$bd_pay->setSpNo('9000100005'); // 合作商户ID
+$bd_pay->setSpKey('pSAw3bzfMKYAXML53dgQ3R4LsKp758Ss'); // 合作支付秘钥
 $bd_pay->setOrderSn('123456789');
 $bd_pay->setPayMoney('0.01');
 $bd_pay->setSubject('֧测试支付');
@@ -45,14 +45,38 @@ $bd_pay->setTradeType(1);
 $res = $bd_pay->directPay();
 echo $res['data']['html_text'];exit;
 
-
 /**********百度钱包支付查询***********/
 $bd_query_pay = new BdpayService();
-$bd_query_pay->setSpNo('');// 合作商户ID
-$bd_query_pay->setSpKey('');// 合作商户的支付秘钥
+$bd_query_pay->setSpNo('9000100005');// 合作商户ID
+$bd_query_pay->setSpKey('pSAw3bzfMKYAXML53dgQ3R4LsKp758Ss');// 合作商户的支付秘钥
 // $out_trade_no 商户网站订单系统中唯一订单号，必填
 $bd_query_res = $bd_query_pay->queryOrder($out_trade_no);
 
+
+/**************百度钱包发起退款****************/
+$bd_refund_pay = new BdpayService();
+$bd_refund_pay->setSpNo('9000100005');// 合作商户ID
+$bd_refund_pay->setSpKey('pSAw3bzfMKYAXML53dgQ3R4LsKp758Ss');// 合作商户的支付秘钥
+$bd_refund_pay->setSuccessUrl('www.baidu.com');
+$bd_refund_pay->setErrorUrl('www.baidu.com');
+$bd_refund_pay->setRefundType(2);// 退款类型 1 退回钱包余额 2 原路退回
+$bd_refund_pay->setCashBackAmount(0.01); //退款金额
+$bd_refund_pay->setCashBackTime(date('YmdHis')); // 退款请求时间
+$order_sn = date("YmdHis"). sprintf ( '%06d', rand(0, 999999));
+$bd_refund_pay->setOrderSn($order_sn);// 商户退款流水号
+$refund_res = $bd_refund_pay->orderRefund();
+echo '<pre>';
+var_dump($refund_res);
+
+/**************百度钱包查询退款结果***************/
+$bd_query_refund_pay = new BdpayService();
+$bd_query_refund_pay->setSpNo('9000100005');
+$bd_query_refund_pay->setOrderSn('20140814173437256936'); // 百度钱包订单号
+$bd_query_refund_pay->setOutTradeNo('2014081417354462'); // 百度钱包退款流水号
+// 根据商户交易流水号查询
+$order_sn_query_res = $bd_query_refund_pay->queryRefundByOrderOn();
+// 根据退款流水号查询
+$out_trade_no_res = $bd_query_refund_pay->queryRefundBySpRefundOn();
 
 
 /**************微信二维码支付************/
