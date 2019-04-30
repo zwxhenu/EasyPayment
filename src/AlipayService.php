@@ -125,6 +125,7 @@ class AlipayService implements PayContract,AlipayConfigContract
     public function setPaymentType($payment_type)
     {
         $this->payment_type = $payment_type;
+
         return $this;
     }
 
@@ -137,6 +138,7 @@ class AlipayService implements PayContract,AlipayConfigContract
     public function setTransport($transport)
     {
         $this->transport = $transport;
+
         return $this;
     }
     /**
@@ -148,6 +150,7 @@ class AlipayService implements PayContract,AlipayConfigContract
     public function setCacert($cacert)
     {
         $this->cacert = $cacert;
+
         return $this;
     }
 
@@ -160,6 +163,7 @@ class AlipayService implements PayContract,AlipayConfigContract
     public function setInputCharset($input_charset)
     {
         $this->input_charset = $input_charset;
+
         return $this;
     }
 
@@ -172,6 +176,7 @@ class AlipayService implements PayContract,AlipayConfigContract
     public function setSignType($sign_type)
     {
         $this->sign_type = $sign_type;
+
         return $this;
     }
 
@@ -184,6 +189,7 @@ class AlipayService implements PayContract,AlipayConfigContract
     public function setNotifyUrl($notify_url)
     {
         $this->notify_url = $notify_url;
+
         return $this;
     }
 
@@ -196,6 +202,7 @@ class AlipayService implements PayContract,AlipayConfigContract
     public function setReturnUrl($return_url)
     {
         $this->return_url = $return_url;
+
         return $this;
     }
 
@@ -208,6 +215,7 @@ class AlipayService implements PayContract,AlipayConfigContract
     public function setItPay($it_b_pay)
     {
         $this->it_b_pay = $it_b_pay;
+
         return $this;
     }
 
@@ -222,6 +230,7 @@ class AlipayService implements PayContract,AlipayConfigContract
     public function setService($service)
     {
         $this->service = $service;
+
         return $this;
     }
 
@@ -234,6 +243,7 @@ class AlipayService implements PayContract,AlipayConfigContract
     public function setPhishingKey($phishing_key)
     {
         $this->anti_phishing_key = $phishing_key;
+
         return $this;
     }
 
@@ -246,6 +256,7 @@ class AlipayService implements PayContract,AlipayConfigContract
     public function setInvokeIp($invoke_ip)
     {
         $this->exter_invoke_ip = $invoke_ip;
+
         return $this;
     }
 
@@ -258,6 +269,7 @@ class AlipayService implements PayContract,AlipayConfigContract
     public function setSellerId($seller_id)
     {
         $this->seller_id = $seller_id;
+
         return $this;
     }
 
@@ -270,6 +282,7 @@ class AlipayService implements PayContract,AlipayConfigContract
     public function setKey($key)
     {
         $this->key = $key;
+
         return $this;
     }
 
@@ -283,6 +296,7 @@ class AlipayService implements PayContract,AlipayConfigContract
     public function setPartner($partner)
     {
         $this->partner = trim($partner);
+
         return $this;
     }
 
@@ -295,6 +309,7 @@ class AlipayService implements PayContract,AlipayConfigContract
     public function setIsWap($is_wap)
     {
         $this->is_wap = (bool)$is_wap;
+
         return $this;
     }
 
@@ -311,6 +326,7 @@ class AlipayService implements PayContract,AlipayConfigContract
             return false;
         }
         $this->pay_money = $pay_money;
+
         return $this;
     }
 
@@ -327,6 +343,7 @@ class AlipayService implements PayContract,AlipayConfigContract
             return false;
         }
         $this->subject = $subject;
+
         return $this;
     }
 
@@ -345,6 +362,7 @@ class AlipayService implements PayContract,AlipayConfigContract
         // body不超过60个字符
         $body = mb_substr($body, 0,  60);
         $this->body = $body;
+
         return $this;
     }
 
@@ -355,6 +373,7 @@ class AlipayService implements PayContract,AlipayConfigContract
     public function setShowUrl($showUrl)
     {
         $this->showUrl = trim($showUrl);
+
         return $this;
     }
 
@@ -368,6 +387,7 @@ class AlipayService implements PayContract,AlipayConfigContract
             return false;
         }
         $this->trade_type = (int)$trade_type;
+
         return $this;
     }
 
@@ -378,6 +398,7 @@ class AlipayService implements PayContract,AlipayConfigContract
     public function setOrderSn($order_sn)
     {
         $this->order_sn = $order_sn;
+
         return $this;
     }
 
@@ -388,6 +409,7 @@ class AlipayService implements PayContract,AlipayConfigContract
     public function setSuccessUrl($success_url)
     {
         $this->success_url = trim($success_url);
+
         return $this;
     }
 
@@ -398,9 +420,22 @@ class AlipayService implements PayContract,AlipayConfigContract
     public function setErrorUrl($error_url)
     {
         $this->error_url = $error_url;
+
         return $this;
     }
 
+    /**
+     * 设置支付宝交易流水号
+     *
+     * @param $out_trade_no
+     * @return $this
+     */
+    public function setOutTradeNo($out_trade_no)
+    {
+        $this->out_trade_no = $out_trade_no;
+
+        return $this;
+    }
     /**
      * 发起支付
      *
