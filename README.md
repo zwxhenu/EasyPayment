@@ -15,4 +15,4 @@
    <p>（3）百度钱包退款</P>
    <p>（4）百度钱包查询退款结果</p>
   <br /><hr>   
-<p color="red">该项目暂时未创建自己的composer包，运行方式：clone到本地，在当前目录下执行composer install，然后配置域名访问就可以！</p>
+<p>安装：composer require henuzwx/easy-payment --dev</p>
