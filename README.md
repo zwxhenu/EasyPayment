@@ -15,4 +15,4 @@
    <p>（3）百度钱包退款</P>
    <p>（4）百度钱包查询退款结果</p>
   <br /><hr>   
-<p>安装：composer require henuzwx/easy-payment --dev</p>
+<p>安装：composer require zwxhenu/easy-payment --dev</p>
