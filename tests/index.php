@@ -20,7 +20,7 @@ $pay->setSuccessUrl('http://www.baidu.com');
 $pay->setErrorUrl('http://auto.news18a.com');
 $pay->setTradeType(1);
 $res = $pay->directPay();
-echo $res['data']['content'];exit;
+
 
 /*******支付宝查询******/
 $query_pay = new AlipayService();
@@ -43,7 +43,7 @@ $bd_pay->setSuccessUrl('http://www.baidu.com');
 $bd_pay->setErrorUrl('http://auto.news18a.com');
 $bd_pay->setTradeType(1);
 $res = $bd_pay->directPay();
-echo $res['data']['html_text'];exit;
+
 
 /**********百度钱包支付查询***********/
 $bd_query_pay = new BdpayService();
@@ -65,8 +65,6 @@ $bd_refund_pay->setCashBackTime(date('YmdHis')); // 退款请求时间
 $order_sn = date("YmdHis"). sprintf ( '%06d', rand(0, 999999));
 $bd_refund_pay->setOrderSn($order_sn);// 商户退款流水号
 $refund_res = $bd_refund_pay->orderRefund();
-echo '<pre>';
-var_dump($refund_res);
 
 /**************百度钱包查询退款结果***************/
 $bd_query_refund_pay = new BdpayService();
