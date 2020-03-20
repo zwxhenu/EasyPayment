@@ -16,6 +16,8 @@ use EasyPayment\payment\wxpay\lib\WxPayApi;
 use EasyPayment\payment\wxpay\lib\WxPayUnifiedOrder;
 use EasyPayment\payment\wxpay\lib\WxPayNativePay;
 use EasyPayment\payment\wxpay\lib\WxPayOrderQuery;
+use EasyPayment\payment\wxpay\lib\WxPayRefund;
+use EasyPayment\payment\wxpay\lib\WxPayRefundQuery;
 use EasyPayment\payment\QrCode;
 
 class WxPayService implements PayContract
@@ -374,7 +376,67 @@ class WxPayService implements PayContract
 
         return $this->pay_common_obj->alertInfo(0, '', $data);
     }
+    /**
+     * 退款方法
+     *
+     * @param string $wx_order_id
+     * @param string $out_trade_no
+     * @param string $out_refund_no
+     * @return array
+     */
+    public function refund($wx_order_id, $out_trade_no, $out_refund_no)
+    {
+       // 加载配置文件
+        WxPayConfig::$APPID = $this->app_id;
+        WxPayConfig::$KEY = $this->key;
+        WxPayConfig::$MCHID = $this->mch_id;
+        WxPayConfig::$APPSECRET = $this->app_secret;
+        $m_time_arr = explode(' ', microtime());
+        $nonce_str = $m_time_arr[1].ltrim($m_time_arr[0], '0.');
+        $input = new WxPayRefund();
+        $input->SetAppid($this->app_id);
+        $input->SetMch_id($this->mch_id);
+        $input->SetNonce_str($nonce_str);
+        $input->SetTransaction_id($wx_order_id);
+        $input->SetOut_trade_no($out_trade_no);
+        $input->SetOut_refund_no($out_refund_no);
+        $input->SetTotal_fee($total_fee);
+        $input->SetRefund_fee($refund_fee);
+        $input->SetRefund_fee_type('CNY');
+        $input->setRefundDesc('');
+        $input->setRefundAccount('');
+        $input->setNotifyUrl(WxPayConfig::NOTIFY_URL);
+        $result = $WxPayApi::refund($input);
+        return $this->pay_common_obj->alertInfo(0, '', $result);
+    }
 
+    /**
+     * 查询退款方法
+     *
+     * @param string $wx_order_id
+     * @param string $out_trade_no
+     * @param string $out_refund_no
+     * @return array
+     */
+    public function refundQuery($wx_order_id, $out_trade_no, $out_refund_no)
+    {
+       // 加载配置文件
+        WxPayConfig::$APPID = $this->app_id;
+        WxPayConfig::$KEY = $this->key;
+        WxPayConfig::$MCHID = $this->mch_id;
+        WxPayConfig::$APPSECRET = $this->app_secret;
+        $m_time_arr = explode(' ', microtime());
+        $nonce_str = $m_time_arr[1].ltrim($m_time_arr[0], '0.');
+        $input = new WxPayRefund();
+        $input->SetAppid($this->app_id);
+        $input->SetMch_id($this->mch_id);
+        $input->SetNonce_str($nonce_str);
+        $input->SetTransaction_id($wx_order_id);
+        $input->SetOut_trade_no($out_trade_no);
+        $input->SetOut_refund_no($out_refund_no);
+        $result = $WxPayApi::refundQuery($input);
+        return $this->pay_common_obj->alertInfo(0, '', $result);
+    }
     /**
      * 支付异步回调
      *

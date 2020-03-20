@@ -375,4 +375,65 @@ class WxPayRefund extends WxPayDataBase
     {
         return array_key_exists('op_user_id', $this->values);
     }
+
+    /**
+     * 设置退款原因
+     *
+     * @param string $value
+     *
+     */
+    public function setRefundDesc($value)
+    {
+        $this->values['refund_desc'] = $value;
+    }
+    /**
+     * 退款原因
+     *
+     * @return mixed
+     *
+     */
+    public function getRefundDesc()
+    {
+        return $this->values['refund_desc'];
+    }
+     /**
+     * 设置退款资金来源
+     *
+     * @param string $value
+     *
+     */
+    public function setRefundAccount($value)
+    {
+        $this->values['refund_account'] = $value;
+    }
+    /**
+     * 退款资金来源
+     *
+     * @return mixed
+     *
+     */
+    public function getRefundAccount()
+    {
+        return $this->values['refund_account'];
+    }
+     /**
+     * 设置退款结果通知
+     *
+     * @param string $value
+     *
+     */
+    public function setNotifyUrl($value)
+    {
+        $this->values['notify_url'] = $value;
+    }
+    /**
+     * 退款结果通知URL
+     *
+     * @return mixed
+     *
+     */
+    public function getNotifyUrl()
+    {
+        return $this->values['notify_url'];
+    }
 }

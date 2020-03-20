@@ -94,7 +94,7 @@ class WxPayApi
      * @return array 成功时返回，其他抛异常
      * @throws WxPayException
      */
-    public function closeOrder($inputObj, $timeOut = 6)
+    public static function closeOrder($inputObj, $timeOut = 6)
     {
         $url = "https://api.mch.weixin.qq.com/pay/closeorder";
         // 检测必填参数
@@ -123,7 +123,7 @@ class WxPayApi
      * @return array 成功时返回，其他抛异常
      * @throws WxPayException
      */
-    public function refund($inputObj, $timeOut = 6)
+    public static function refund($inputObj, $timeOut = 6)
     {
         $url = "https://api.mch.weixin.qq.com/secapi/pay/refund";
         // 检测必填参数
@@ -161,7 +161,7 @@ class WxPayApi
      * @return array 成功时返回，其他抛异常
      * @throws WxPayException
      */
-    public function refundQuery($inputObj, $timeOut = 6)
+    public static function refundQuery($inputObj, $timeOut = 6)
     {
         $url = "https://api.mch.weixin.qq.com/pay/refundquery";
         // 检测必填参数
@@ -190,7 +190,7 @@ class WxPayApi
      * @return mixed|string 成功时返回，其他抛异常
      * @throws WxPayException
      */
-    public function downloadBill($inputObj, $timeOut = 6)
+    public static function downloadBill($inputObj, $timeOut = 6)
     {
         $url = "https://api.mch.weixin.qq.com/pay/downloadbill";
         // 检测必填参数
@@ -287,7 +287,7 @@ class WxPayApi
      * @return mixed 成功时返回，其他抛异常
      * @throws WxPayException
      */
-    public function report($inputObj, $timeOut = 1)
+    public static function report($inputObj, $timeOut = 1)
     {
         $url = "https://api.mch.weixin.qq.com/payitil/report";
         // 检测必填参数
@@ -352,7 +352,7 @@ class WxPayApi
      * @return mixed 成功时返回，其他抛异常
      * @throws WxPayException
      */
-    public function shorturl($inputObj, $timeOut = 6)
+    public static function shorturl($inputObj, $timeOut = 6)
     {
         $url = "https://api.mch.weixin.qq.com/tools/shorturl";
         // 检测必填参数

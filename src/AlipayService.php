@@ -501,7 +501,32 @@ class AlipayService implements PayContract,AlipayConfigContract
 
         return $this->pay_common_obj->alertInfo(0, '成功！', array('content' =>$html_text));
     }
+     /**
+     * 即时到账有密退款
+     * 
+     * @return array
+     */
+    public function fastPayRefundByPlatformPwd()
+    {
+        $service = 'refund_fastpay_by_platform_pwd';
+        $alipay_config = array(
+            'service' => $service,
+            'partner' => $this->partner,
+            'input_charset' => $this->input_charset,
+            'sign_type' => $this->sign_type,
+            'notify_url' => $this->notify_url,
+            
+            'seller_email' => $this->seller_email, // 卖家支付宝账号
+            'seller_user_id' => $this->partner, // 卖家用户ID同商户ID
+            'refund_date' => date('Y-m-d H:i:s'),
+            'batch_no' =>  $this->batch_on, //退款批次号  格式为：退款日期（8位）+流水号（3～24位）
+            'batch_num' => $this->batch_num, // 退款总笔数 最大支持1000笔
+            'cacert' => __DIR__ . '/lib/cacert.pem');
+            $alipaySubmit = new AlipaySubmit($alipay_config);
+            $html_text = $alipaySubmit->buildRequestHttp(alipay_config, "get", "success");
 
+             return $this->pay_common_obj->alertInfo(0, 'success', array('content' =>$html_text));
+    }
     /**
      * 查询订单支付状态
      * @param string $trade_no
