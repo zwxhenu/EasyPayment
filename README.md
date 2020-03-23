@@ -1,10 +1,10 @@
 # EasyPayment（Third party payment class library,Contain alipay, wxpay, bdpay）
 
-.[![Latest Stable Version].(https://poser.pugx.org/zwxhenu/easy-payment/v/stable)](https://packagist.org/packages/zwxhenu/easy-payment)
-.[![Total Downloads].(https://poser.pugx.org/zwxhenu/easy-payment/downloads)](https://packagist.org/packages/zwxhenu/easy-payment)
-.[![Latest Unstable Version].(https://poser.pugx.org/zwxhenu/easy-payment/v/unstable)](https://packagist.org/packages/zwxhenu/easy-payment)
-.[![License].(https://poser.pugx.org/zwxhenu/easy-payment/license)](https://packagist.org/packages/zwxhenu/easy-payment)
-.[![composer.lock].(https://poser.pugx.org/zwxhenu/easy-payment/composerlock)](https://packagist.org/packages/zwxhenu/easy-payment)
+.[![Latest Stable Version].(https://poser.pugx.org/zwxhenu/easy-payment/v/stable)].(https://packagist.org/packages/zwxhenu/easy-payment)
+.[![Total Downloads].(https://poser.pugx.org/zwxhenu/easy-payment/downloads)].(https://packagist.org/packages/zwxhenu/easy-payment)
+.[![Latest Unstable Version].(https://poser.pugx.org/zwxhenu/easy-payment/v/unstable)].(https://packagist.org/packages/zwxhenu/easy-payment)
+.[![License].(https://poser.pugx.org/zwxhenu/easy-payment/license)].(https://packagist.org/packages/zwxhenu/easy-payment)
+.[![composer.lock].(https://poser.pugx.org/zwxhenu/easy-payment/composerlock)].(https://packagist.org/packages/zwxhenu/easy-payment)
 
 ### 参考文档[支付文档]<a href="https://pay.weixin.qq.com/wiki/doc/api/jsapi.php?chapter=7_1">微信支付SDK</a>，<a href="https://opendocs.alipay.com/open/62/104743/">支付宝支付SDK</a>，<a href="https://b.baifubao.com/static/spcenter/fe-wallet-open-platform/entry/develop-document/#/document?mdUrl=5bd00a26557d0a2f834cd231">百度钱包SDK</a></p>
 
