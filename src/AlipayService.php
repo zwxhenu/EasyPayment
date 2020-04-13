@@ -106,6 +106,30 @@ class AlipayService implements PayContract,AlipayConfigContract
      */
     private $seller_id = '';
     /**
+     * 卖家支付账号
+     *
+     * @var string
+     */
+    private $seller_email = '';
+    /**
+     * 退款批次号 退款商家自动生成 （退款日期（8位）+流水号（3～24位））
+     *
+     * @var string
+     */
+    private $batch_on = '';
+    /**
+     * 总笔数 最大支持1000笔
+     *
+     * @var string
+     */
+    private $batch_num = '';
+    /**
+     * 单笔数据集 退款请求的明细数据 例如：2014040311001004370000361525^5.00^协商退款
+     *
+     * @var string
+     */
+    private $detail_data = '';
+    /**
      * MD5密钥，安全检验码，由数字和字母组成的32位字符串，查看地址：https://b.alipay.com/order/pidAndKey.htm
      *
      * @var string
@@ -392,6 +416,8 @@ class AlipayService implements PayContract,AlipayConfigContract
     }
 
     /**
+     * 商户订单唯一订单号
+     *
      * @param string $order_sn
      * @return $this
      */
@@ -434,6 +460,55 @@ class AlipayService implements PayContract,AlipayConfigContract
     {
         $this->out_trade_no = $out_trade_no;
 
+        return $this;
+    }
+
+    /**
+     * 设置卖家的支付宝账号
+     *
+     * @param $seller_email
+     *
+     * @return $this
+     */
+    public function setSellerEmail($seller_email)
+    {
+        $this->seller_email = $seller_email;
+        return $this;
+    }
+
+    /**
+     * 设置退款批次号
+     *
+     * @param $batch_on
+     * @return $this
+     */
+    public function setBatchOn($batch_on)
+    {
+        $this->batch_on = $batch_on;
+        return $this;
+    }
+    /**
+     * 设置退款总笔数
+     *
+     * @param $batch_num
+     * @return $this
+     */
+    public function setBatchNum($batch_num)
+    {
+        $this->batch_num = $batch_num;
+        return $this;
+    }
+
+    /**
+     * 设置单笔数据集
+     *
+     * @param $detail_data
+     *
+     * @return $this
+     */
+    public function setDetailData($detail_data)
+    {
+        $this->detail_data = $detail_data;
         return $this;
     }
     /**
@@ -501,22 +576,45 @@ class AlipayService implements PayContract,AlipayConfigContract
 
         return $this->pay_common_obj->alertInfo(0, '成功！', array('content' =>$html_text));
     }
-
-    /**
-     * 查询订单支付状态
-     * @param string $trade_no
-     * @param string $out_trade_no
+     /**
+     * 即时到账有密退款
+     * 
      * @return array
      */
-    public function queryOrder($trade_no = '', $out_trade_no = '')
+    public function fastPayRefundByPlatformPwd()
+    {
+        $service = 'refund_fastpay_by_platform_pwd';
+        $alipay_config = array(
+            'service' => $service,
+            'partner' => $this->partner,
+            'input_charset' => $this->input_charset,
+            'sign_type' => $this->sign_type,
+            'notify_url' => $this->notify_url,
+            
+            'seller_email' => $this->seller_email, // 卖家支付宝账号
+            'seller_user_id' => $this->partner, // 卖家用户ID同商户ID
+            'refund_date' => date('Y-m-d H:i:s'),
+            'batch_no' =>  $this->batch_on, //退款批次号  格式为：退款日期（8位）+流水号（3～24位）
+            'batch_num' => $this->batch_num, // 退款总笔数 最大支持1000笔
+            );
+            $alipay_submit = new AlipaySubmit($alipay_config);
+            $html_text = $alipay_submit->buildRequestHttp($alipay_config, "get", "success");
+
+            return $this->pay_common_obj->alertInfo(0, 'success', array('content' =>$html_text));
+    }
+    /**
+     * 查询订单支付状态
+     * @return array
+     */
+    public function queryOrder()
     {
         //查询支付信息
         $pay_config = $this->getPayQueryOrderConfig();
         $parameter = array(
             "service" => "single_trade_query",
             "partner" => $pay_config['partner'],
-            "trade_no" => $trade_no,  // 支付宝交易流水号
-            "out_trade_no" => $out_trade_no,  // 商户网站订单系统中唯一订单号，必填
+            "trade_no" => $this->out_trade_no,  // 支付宝交易流水号
+            "out_trade_no" => $this->order_sn,  // 商户网站订单系统中唯一订单号，必填
             "_input_charset" => trim(strtolower($pay_config['input_charset']))
         );
         // 建立请求
