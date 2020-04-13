@@ -86,7 +86,6 @@ class WxPayApi
 
         return $result;
     }
-
     /**
      * 关闭订单
      * @param WxPayCloseOrder $inputObj
@@ -94,7 +93,7 @@ class WxPayApi
      * @return array 成功时返回，其他抛异常
      * @throws WxPayException
      */
-    public function closeOrder($inputObj, $timeOut = 6)
+    public static function closeOrder($inputObj, $timeOut = 6)
     {
         $url = "https://api.mch.weixin.qq.com/pay/closeorder";
         // 检测必填参数
@@ -123,7 +122,7 @@ class WxPayApi
      * @return array 成功时返回，其他抛异常
      * @throws WxPayException
      */
-    public function refund($inputObj, $timeOut = 6)
+    public static function refund($inputObj, $timeOut = 6)
     {
         $url = "https://api.mch.weixin.qq.com/secapi/pay/refund";
         // 检测必填参数
@@ -154,14 +153,16 @@ class WxPayApi
 
     /**
      * 查询退款
-     * 提交退款申请后，通过调用该接口查询退款状态。退款有一定延时，
-     * 用零钱支付的退款20分钟内到账，银行卡支付的退款3个工作日后重新查询退款状态。
+     *
+     * @deprecated  提交退款申请后，通过调用该接口查询退款状态。退款有一定延时，
+     * @deprecated 用零钱支付的退款20分钟内到账，银行卡支付的退款3个工作日后重新查询退款状态。
      * @param WxPayRefundQuery $inputObj
      * @param int $timeOut
+     *
      * @return array 成功时返回，其他抛异常
      * @throws WxPayException
      */
-    public function refundQuery($inputObj, $timeOut = 6)
+    public static function refundQuery($inputObj, $timeOut = 6)
     {
         $url = "https://api.mch.weixin.qq.com/pay/refundquery";
         // 检测必填参数
@@ -184,13 +185,181 @@ class WxPayApi
     }
 
     /**
+     * 普通红包发送方法
+     *
+     * @param $inputObj
+     * @param int $timeOut
+     *
+     * @return array
+     * @throws \EasyPayment\payment\wxpay\lib\WxPayException
+     */
+    public static function sendRedPack($inputObj, $timeOut = 1)
+    {
+        $url = "https://api.mch.weixin.qq.com/mmpaymkttransfers/sendredpack";
+        // 检测必填参数
+        if (!$inputObj->IsMch_bill_noSet()) {
+            throw new WxPayException("红包商户订单号未设置！");
+        }
+        if (!$inputObj->IsSend_nameSet()) {
+            throw new WxPayException("红包商户名称未设置！");
+        }
+        if (!$inputObj->IsRe_OpenidSet()) {
+            throw new WxPayException("接受红包的用户openid未设置！");
+        }
+        if (!$inputObj->IsSend_nameSet()) {
+            throw new WxPayException("商户名称未设置！");
+        }
+        if (!$inputObj->IsTotal_amountSet()) {
+            throw new WxPayException("红包金额未设置！");
+        }
+        if (!$inputObj->IsTotal_numSet()) {
+            throw new WxPayException("红包总人数未设置！");
+        }
+        if (!$inputObj->IsWishingSet()) {
+            throw new WxPayException("红包祝福语未设置！");
+        }
+        if (!$inputObj->IsClient_ipSet()) {
+            throw new WxPayException("红包客户端IP未设置！");
+        }
+        if (!$inputObj->IsAction_nameSet()) {
+            throw new WxPayException("红包活动名称未设置！");
+        }
+        if (!$inputObj->IsRemarkSet()) {
+            throw new WxPayException("红包备注信息未设置！");
+        }
+        if(!$inputObj->IsWx_app_idSet()){
+            $inputObj->SetWx_app_id(WxPayConfig::$WXAPPID); // 公众账号ID
+        }
+        if(!$inputObj->IsMch_idSet()){
+            $inputObj->SetMch_id(WxPayConfig::$MCHID); // 商户号
+        }
+        if(!$inputObj->IsNonce_strSet()){
+            $inputObj->SetNonce_str(self::getNonceStr()); // 随机字符串
+        }
+
+        $inputObj->SetSign(); // 签名
+        $xml = $inputObj->ToXml();
+
+        $startTimeStamp = self::getMillisecond(); // 请求开始时间
+        $response = self::postXmlCurl($xml, $url, true, $timeOut);
+        $result = WxPayResults::Init($response);
+        self::reportCostTime($url, $startTimeStamp, $result); // 上报请求花费时间
+
+        return $result;
+    }
+
+    /**
+     * 裂变红包发放方法
+     *
+     * @param $inputObj
+     * @param int $timeOut
+     *
+     * @return array
+     * @throws \EasyPayment\payment\wxpay\lib\WxPayException
+     */
+    public function sendFissionRedPack($inputObj, $timeOut = 1)
+    {
+        $url = 'https://api.mch.weixin.qq.com/mmpaymkttransfers/sendgroupredpack';
+        // 检测必填参数
+        if (!$inputObj->IsMch_bill_noSet()) {
+            throw new WxPayException("红包商户订单号未设置！");
+        }
+        if (!$inputObj->IsSend_nameSet()) {
+            throw new WxPayException("红包商户名称未设置！");
+        }
+        if (!$inputObj->IsRe_OpenidSet()) {
+            throw new WxPayException("接受红包的用户openid未设置！");
+        }
+        if (!$inputObj->IsSend_nameSet()) {
+            throw new WxPayException("商户名称未设置！");
+        }
+        if (!$inputObj->IsTotal_amountSet()) {
+            throw new WxPayException("红包金额未设置！");
+        }
+        if (!$inputObj->IsTotal_numSet()) {
+            throw new WxPayException("红包总人数未设置！");
+        }
+        if (!$inputObj->IsWishingSet()) {
+            throw new WxPayException("红包祝福语未设置！");
+        }
+        if (!$inputObj->IsClient_ipSet()) {
+            throw new WxPayException("红包客户端IP未设置！");
+        }
+        if (!$inputObj->IsAction_nameSet()) {
+            throw new WxPayException("红包活动名称未设置！");
+        }
+        if (!$inputObj->IsRemarkSet()) {
+            throw new WxPayException("红包备注信息未设置！");
+        }
+        if (!$inputObj->IsAmt_typeSet()) {
+            throw new WxPayException("裂变红包金额设置方式未设置！");
+        }
+        if(!$inputObj->IsWx_app_idSet()){
+            $inputObj->SetWx_app_id(WxPayConfig::$WXAPPID); // 公众账号ID
+        }
+        if(!$inputObj->IsMch_idSet()){
+            $inputObj->SetMch_id(WxPayConfig::$MCHID); // 商户号
+        }
+        if(!$inputObj->IsNonce_strSet()){
+            $inputObj->SetNonce_str(self::getNonceStr()); // 随机字符串
+        }
+
+        $inputObj->SetSign(); // 签名
+        $xml = $inputObj->ToXml();
+
+        $startTimeStamp = self::getMillisecond(); // 请求开始时间
+        $response = self::postXmlCurl($xml, $url, true, $timeOut);
+        $result = WxPayResults::Init($response);
+        self::reportCostTime($url, $startTimeStamp, $result); // 上报请求花费时间6
+
+        return $result;
+
+    }
+
+    /**
+     * 查询红包记录（普通红包|裂变红包）
+     *
+     * @param $inputObj
+     * @param int $timeOut
+     *
+     * @return array
+     * @throws \EasyPayment\payment\wxpay\lib\WxPayException
+     */
+    public function queryRedPackInfo($inputObj, $timeOut = 1)
+    {
+        $url = 'https://api.mch.weixin.qq.com/mmpaymkttransfers/gethbinfo';
+        // 检测必填参数
+        if (!$inputObj->IsMch_bill_noSet()) {
+            throw new WxPayException("红包商户订单号未设置！");
+        }
+        if(!$inputObj->IsWx_app_idSet()){
+            $inputObj->SetWx_app_id(WxPayConfig::$WXAPPID); // 公众账号ID
+        }
+        if(!$inputObj->IsMch_idSet()){
+            $inputObj->SetMch_id(WxPayConfig::$MCHID); // 商户号
+        }
+        if(!$inputObj->IsNonce_strSet()){
+            $inputObj->SetNonce_str(self::getNonceStr()); // 随机字符串
+        }
+
+        $inputObj->SetSign(); // 签名
+        $xml = $inputObj->ToXml();
+
+        $startTimeStamp = self::getMillisecond(); // 请求开始时间
+        $response = self::postXmlCurl($xml, $url, true, $timeOut);
+        $result = WxPayResults::Init($response);
+        self::reportCostTime($url, $startTimeStamp, $result); // 上报请求花费时间6
+
+        return $result;
+    }
+    /**
      * 下载对账单
      * @param WxPayDownloadBill $inputObj
      * @param int $timeOut
      * @return mixed|string 成功时返回，其他抛异常
      * @throws WxPayException
      */
-    public function downloadBill($inputObj, $timeOut = 6)
+    public static function downloadBill($inputObj, $timeOut = 6)
     {
         $url = "https://api.mch.weixin.qq.com/pay/downloadbill";
         // 检测必填参数
@@ -287,7 +456,7 @@ class WxPayApi
      * @return mixed 成功时返回，其他抛异常
      * @throws WxPayException
      */
-    public function report($inputObj, $timeOut = 1)
+    public static function report($inputObj, $timeOut = 1)
     {
         $url = "https://api.mch.weixin.qq.com/payitil/report";
         // 检测必填参数
@@ -352,7 +521,7 @@ class WxPayApi
      * @return mixed 成功时返回，其他抛异常
      * @throws WxPayException
      */
-    public function shorturl($inputObj, $timeOut = 6)
+    public static function shorturl($inputObj, $timeOut = 6)
     {
         $url = "https://api.mch.weixin.qq.com/tools/shorturl";
         // 检测必填参数
