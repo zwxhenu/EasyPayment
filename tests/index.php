@@ -5,30 +5,46 @@ namespace EasyPayment\payment\Tests;
 use EasyPayment\payment\alipayService;
 use EasyPayment\payment\BdpayService;
 use EasyPayment\payment\WxPayService;
+use EasyPayment\payment\WxRedPackService;
 
 require './../vendor/autoload.php';
 /*********支付宝*************/
+
 $pay = new AlipayService();
-$pay->setPartner(''); // 合作商户
-$pay->setSellerId(''); // 合作商户ID
-$pay->setKey(''); // 合作商户支付秘钥
-$pay->setOrderSn('13354666');
-$pay->setPayMoney('0.01');
-$pay->setSubject('֧测试支付');
-$pay->setBody('֧测试支付');
-$pay->setSuccessUrl('http://www.baidu.com');
-$pay->setErrorUrl('http://auto.news18a.com');
-$pay->setTradeType(1);
+#-----公共参数配置------#
+$pay->setPartner(''); //合作商户
+$pay->setInputCharset('utf-8'); // 参数编码字符集 默认utf-8
+$pay->setSignType('MD5'); // 签名方式默认 MD5
+$pay->setNotifyUrl(''); // 服务器异步通知页面路径
+#-----公共参数配置结束-----#
+
+$pay->setSellerId(''); // 卖家支付宝用户号
+$pay->setOrderSn('13354666'); // 商户网站唯一订单号
+$pay->setPayMoney('0.01'); // 交易金额
+$pay->setSubject('֧测试支付'); //商品名称
+$pay->setBody('֧测试支付'); // 商品描述
+$pay->setReturnUrl('http://www.baidu.com'); // 页面跳转同步通知页面路径
+$pay->setTradeType(1); // 支付类型
 $res = $pay->directPay();
 
-
 /*******支付宝查询******/
-$query_pay = new AlipayService();
-$query_pay->setKey('');// 合作商户支付秘钥
-$query_pay->setSellerId('');// 合作商户ID
-$query_pay->setPartner('');// 合作商户
+$trade_no = '';
+$out_trade_no = '';
+$pay->setKey('');// 合作商户支付秘钥
+$pay->setSellerId('');// 合作商户ID
+$pay->setPartner('');// 合作商户
+$pay->setOutTradeNo('');// 支付宝交易流水号
+$pay->setOrderSn('');// 商户网站订单系统中唯一订单号
 // $trade_no 支付宝交易流水号 $out_trade_no 商户网站订单系统中唯一订单号，必填
-$query_res = $query_pay->queryOrder($trade_no, $out_trade_no);
+$query_res = $pay->queryOrder();
+
+/*******支付宝即时退款*****/
+$pay->setSellerEmail('');// 卖家支付宝账号
+$pay->setSellerId('');// 卖家用户ID
+$pay->setBatchOn('');// 退款批次号 格式为：退款日期（8位）+流水号（3～24位）。
+$pay->setBatchNum(1);// 总笔数 最大支持1000笔
+$pay->setDetailData(''); // 单笔数据集 例如：2014040311001004370000361525^5.00^协商退款
+$refund_res = $pay->fastPayRefundByPlatformPwd();
 
 
 /**************百度钱包************/
@@ -85,33 +101,32 @@ $out_trade_no_res = $bd_query_refund_pay->queryRefundBySpRefundOn();
  * KEY：商户支付密钥，参考开户邮件设置（必须配置）
  * APPSECRET：公众帐号secert（仅JSAPI支付的时候需要配置）
  **/
-$wx_qrcode_pay = new WxPayService();
+$wx_pay = new WxPayService();
+#--------公共配置--------#
 // 商户号（必须配置）
-$wx_qrcode_pay->setMchId('');
+$wx_pay->setMchId('');
 // 公众帐号secert（仅JSAPI支付的时候需要配置）
-$wx_qrcode_pay->setAppSecret('');
+$wx_pay->setAppSecret('');
 // 绑定支付的APPID
-$wx_qrcode_pay->setAppId('');
+$wx_pay->setAppId('');
 // KEY：商户支付密钥，参考开户邮件设置（必须配置）
-$wx_qrcode_pay->setKey('');
-$wx_qrcode_pay->setOrderSn('12345689');
-$wx_qrcode_pay->setOutOrderNo('4567891');
-$wx_qrcode_pay->setPayMoney(0.01);
-$wx_qrcode_pay->setSubject('测试二维码支付');
-$wx_qrcode_pay->setBody('测试二维码支付');
-$wx_qrcode_pay->setSuccessUrl('http://www.baidu.com');
-$wx_qrcode_pay->setErrorUrl('http://www.baidu.com');
-$wx_qrcode_pay->setTradeType(1);
-$res = $wx_qrcode_pay->nativePay();
+$wx_pay->setKey('');
+#--------公共配置结束--------#
+
+$wx_pay->setOrderSn('12345689');
+$wx_pay->setOutOrderNo('4567891');
+$wx_pay->setPayMoney(0.01);
+$wx_pay->setSubject('测试二维码支付');
+$wx_pay->setBody('测试二维码支付');
+$wx_pay->setSuccessUrl('http://www.baidu.com');
+$wx_pay->setErrorUrl('http://www.baidu.com');
+$wx_pay->setTradeType(1);
+$res = $wx_pay->nativePay();
 $qrcode = $res['data'];
 echo $_SERVER['HTTP_HOST'].'/'.$qrcode;
 
 /**************微信支付************/
-$wx_pay = new WxPayService();
-$wx_pay->setMchId('');
-$wx_pay->setAppSecret('');
-$wx_pay->setAppId('');
-$wx_pay->setKey('');
+
 $wx_pay->setIsWap(true);
 $wx_pay->setOrderSn('123456789');
 $wx_pay->setPayMoney(0.01);
@@ -120,14 +135,140 @@ $wx_pay->setBody('测试微信支付');
 $wx_pay->setSuccessUrl('http://www.baidu.com');
 $wx_pay->setErrorUrl('http://www.baidu.com');
 $res = $wx_pay->jsAPIPay('454645'); // 微信的openid
-var_dump($res);exit;
 
 /*************微信支付查询*************/
 
-$wx_pay_query = new WxPayService();
-$wx_pay_query->setMchId('');
-$wx_pay_query->setAppSecret('');
-$wx_pay_query->setAppId('');
-$wx_pay_query->setKey('');
-// $trade_no 微信交易流水号 $out_trade_no 商户网站订单系统中唯一订单号，必填
-$wx_pay_query_res = $wx_pay_query->queryOrder($trade_no, $out_trade_no);
+$wx_pay->setWxOrderId(''); //微信交易流水号
+$wx_pay->setOutOrderNo(''); // 商户网站订单系统中唯一订单号，必填
+$wx_pay_query_res = $wx_pay->queryOrder();
+
+/*******微信支付退款***/
+$wx_pay->setWxOrderId(''); //微信交易流水号
+$wx_pay->setOutOrderNo(''); // 商户网站订单系统中唯一订单号，必填
+$wx_pay->setOutRefundNo(''); // 商户定义的退款订单编号
+$wx_pay->setTotalFee(); // 标价金额
+$wx_pay->setRefundFee(); // 退款金额
+$wx_pay->setRefundDesc(); // 退款原因
+$wx_pay->setRefundAccount(); // 退款资金来源
+$wx_pay->setNotifyUrl(); // 退款结果通知url
+$wx_pay->refund();
+
+/*********微信退款结果查询*******/
+
+$wx_pay->setWxOrderId(''); //微信交易流水号
+$wx_pay->setOutOrderNo(''); // 商户网站订单系统中唯一订单号，必填
+$wx_pay->setOutRefundNo(''); // 商户定义的退款订单编号
+$wx_pay->setRefundId(''); // 微信退款订单号
+###以上四选一就可以查询####
+$wx_pay->refundQuery();
+
+/********微信公众平台发送普通红包*******/
+
+$wx_red_pack = new WxRedPackService();
+
+/*******普通红包********/
+// 随机字符串，不长于32位
+$wx_red_pack->setNonceStr('');
+// 商户订单号（每个订单号必须唯一。取值范围：0~9，a~z，A~Z）
+// 接口根据商户订单号支持重入，如出现超时可再调用。
+$wx_red_pack->setMchBillNo('');
+// 微信支付分配的商户号
+$wx_red_pack->setMchId('');
+// 微信分配的公众账号ID（企业号corpid即为此appId）。
+// 在微信开放平台（open.weixin.qq.com）申请的移动应用appid无法使用该接口。
+$wx_red_pack->setWxAppId('');
+// 红包发送者名称 注意：敏感词会被转义成字符*
+$wx_red_pack->setSendName('');
+// 接受红包的用户openid openid为用户在wxappid下的唯一标识
+$wx_red_pack->setReOpenId('');
+// 付款金额，单位分
+$wx_red_pack->setTotalAmount('');
+// 红包发放总人数
+$wx_red_pack->setTotalNum('');
+// 红包祝福语
+$wx_red_pack->setWishing('');
+// 调用接口的机器Ip地址
+$wx_red_pack->setClientIp('');
+// 活动名称 注意：敏感词会被转义成字符*
+$wx_red_pack->setActName('');
+// 发放红包使用场景，红包金额大于200或者小于1元时必传
+//
+//PRODUCT_1:商品促销
+//
+//PRODUCT_2:抽奖
+//
+//PRODUCT_3:虚拟物品兑奖
+//
+//PRODUCT_4:企业内部福利
+//
+//PRODUCT_5:渠道分润
+//
+//PRODUCT_6:保险回馈
+//
+//PRODUCT_7:彩票派奖
+//
+//PRODUCT_8:税务刮奖
+$wx_red_pack->setSceneId('');
+//posttime:用户操作的时间戳
+//
+//mobile:业务系统账号的手机号，国家代码-手机号。不需要+号
+//
+//deviceid :mac 地址或者设备唯一标识
+//
+//clientversion :用户操作的客户端版本
+//
+//把值为非空的信息用key=value进行拼接，再进行urlencode
+//
+//urlencode(posttime=xx& mobile =xx&deviceid=xx)
+
+$wx_red_pack->setRiskInfo('');
+
+$wx_red_pack->sendRedPack();
+
+/******裂变红包*****/
+$wx_fission_red_pack = new WxRedPackService();
+// 随机字符串，不长于32位
+$wx_fission_red_pack->setNonceStr('');
+// 商户订单号（每个订单号必须唯一。取值范围：0~9，a~z，A~Z）
+// 接口根据商户订单号支持重入，如出现超时可再调用。
+$wx_fission_red_pack->setMchBillNo('');
+// 微信支付分配的商户号
+$wx_fission_red_pack->setMchId('');
+// 微信分配的公众账号ID（企业号corpid即为此appId）。
+// 在微信开放平台（open.weixin.qq.com）申请的移动应用appid无法使用该接口。
+$wx_fission_red_pack->setWxAppId('');
+// 红包发送者名称 注意：敏感词会被转义成字符*
+$wx_fission_red_pack->setSendName('');
+// 接受红包的用户openid openid为用户在wxappid下的唯一标识
+$wx_fission_red_pack->setReOpenId('');
+// 付款金额，单位分
+$wx_fission_red_pack->setTotalAmount('');
+// 红包发放总人数
+$wx_fission_red_pack->setTotalNum('');
+// 红包祝福语
+$wx_fission_red_pack->setWishing('');
+// 调用接口的机器Ip地址
+$wx_fission_red_pack->setClientIp('');
+// 活动名称 注意：敏感词会被转义成字符*
+$wx_fission_red_pack->setActName('');
+
+$wx_fission_red_pack->sendFissionRedPack();
+
+/*****红包查询信息********/
+
+$wx_query_red_pack = new WxRedPackService();
+// 随机字符串，不长于32位
+$wx_query_red_pack->setNonceStr('');
+// 商户订单号（每个订单号必须唯一。取值范围：0~9，a~z，A~Z）
+// 接口根据商户订单号支持重入，如出现超时可再调用。
+$wx_query_red_pack->setMchBillNo('');
+// 微信支付分配的商户号
+$wx_query_red_pack->setMchId('');
+// 微信分配的公众账号ID（企业号corpid即为此appId）。
+// 在微信开放平台（open.weixin.qq.com）申请的移动应用appid无法使用该接口。
+$wx_query_red_pack->setWxAppId('');
+// 红包订单类型（查询红包信息参数 当前只有个值：MCHT）
+// MCHT:通过商户订单号获取红包信息。
+$wx_query_red_pack->setBillType('');
+
+$wx_query_red_pack->queryRedPackInfo();
