@@ -10,7 +10,6 @@
 
 # 环境要求
 - php版本:>=5.6
-- laravel版本: Laravel5.5+
 
 # 安装
 ```php
@@ -29,18 +28,20 @@ composer require zwxhenu/easy-payment
    - [微信裂变红包](#微信裂变红包)
    - [微信红包信息查询](#微信红包信息查询)
 ## 支付宝
-   - 网页版支付
-   - 支付查询
-   - 即时有密退款
+   - [支付宝网页版支付](#支付宝网页支付)
+   - [支付宝支付查询](#支付宝支付查询)
+   - [支付宝即时有密退款](#支付宝即时有密退款)
 ## 百度钱包 
-   - 网页版支付
-   - 支付查询
-   - 退款
-   - 查询退款结果
+   - [百度钱包网页版支付](#百度钱包网页版支付)
+   - [百度钱包支付查询](#百度钱包支付查询)
+   - [百度钱包退款](#百度钱包退款)
+   - [百度钱包查询退款结果](#百度钱包查询退款结果)
    
 # 使用示例
 
 ## 支付宝示例
+
+### <a id="支付宝网页支付">支付宝网页支付</a>
 
 ```php
 use EasyPayment\payment\alipayService;
@@ -64,6 +65,11 @@ $pay->setReturnUrl('http://www.baidu.com'); // 页面跳转同步通知页面路
 $pay->setTradeType(1); // 支付类型
 $res = $pay->directPay();
 
+```
+
+### <a id="支付宝支付查询">支付宝支付查询</a>
+
+```php
 /*******支付宝查询******/
 $trade_no = '';
 $out_trade_no = '';
@@ -74,6 +80,12 @@ $pay->setOutTradeNo('');// 支付宝交易流水号
 $pay->setOrderSn('');// 商户网站订单系统中唯一订单号
 // $trade_no 支付宝交易流水号 $out_trade_no 商户网站订单系统中唯一订单号，必填
 $query_res = $pay->queryOrder();
+
+```
+
+### <a id="支付宝即时有密退款">支付宝即时有密退款</a>
+
+```php
 
 /*******支付宝即时退款*****/
 $pay->setSellerEmail('');// 卖家支付宝账号
@@ -297,6 +309,8 @@ $wx_pay->refundQuery();
 
 ## 百度钱包示例
 
+### <a id="百度钱包网页版支付">百度钱包网页版支付</a>
+
 ```php
 
 use EasyPayment\payment\BdpayService;
@@ -315,6 +329,8 @@ $res = $bd_pay->directPay();
 
 ```
 
+### <a id="百度钱包支付查询">百度钱包支付查询</a>
+
 ```php
 
 /**********百度钱包支付查询***********/
@@ -325,6 +341,8 @@ $bd_query_pay->setSpKey('pSAw3bzfMKYAXML53dgQ3R4LsKp758Ss');// 合作商户的�
 $bd_query_res = $bd_query_pay->queryOrder($out_trade_no);
 
 ```
+
+### <a id="百度钱包退款">百度钱包退款</a>
 
 ```php
 
@@ -342,6 +360,8 @@ $bd_refund_pay->setOrderSn($order_sn);// 商户退款流水号
 $refund_res = $bd_refund_pay->orderRefund();
 
 ```
+
+### <a id="百度钱包查询退款结果">百度钱包查询退款结果</a>
 
 ```php
 
